@@ -28,26 +28,20 @@ Deno.serve(async (req) => {
     const { data: { user: caller } } = await supabaseUser.auth.getUser();
     if (!caller) throw new Error("Not authenticated");
 
-    const { data: isStaff } = await supabaseAdmin.rpc("is_staff_or_owner", { _user_id: caller.id });
-    if (!isStaff) throw new Error("Unauthorized");
+    const { data: callerIsStaff } = await supabaseAdmin.rpc("is_staff_or_owner", { _user_id: caller.id });
+    if (!callerIsStaff) throw new Error("Unauthorized");
 
-    const { student_id, email, password } = await req.json();
-    if (!student_id || !email || !password) {
-      throw new Error("student_id, email, and password are required");
+    const { email, password, role, gym_id } = await req.json();
+    if (!email || !password || !gym_id) {
+      throw new Error("email, password, and gym_id are required");
     }
 
-    const { data: student, error: studentErr } = await supabaseAdmin
-      .from("students")
-      .select("id, user_id, full_name, gym_id")
-      .eq("id", student_id)
-      .single();
-
-    if (studentErr || !student) throw new Error("Student not found");
-    if (student.user_id) throw new Error("Student already has portal access");
+    const validRoles = ['manager', 'staff'];
+    const userRole = validRoles.includes(role) ? role : 'manager';
 
     const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
     const emailExists = existingUsers?.users?.find((u: any) => u.email === email);
-    if (emailExists) throw new Error("Email already registered");
+    if (emailExists) throw new Error("El email ya está registrado");
 
     const { data: newUser, error: createErr } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -58,17 +52,12 @@ Deno.serve(async (req) => {
 
     await supabaseAdmin.from("user_roles").insert({
       user_id: newUser.user.id,
-      role: "student",
-      gym_id: student.gym_id,
+      role: userRole,
+      gym_id,
     });
 
-    await supabaseAdmin.from("students").update({ 
-      user_id: newUser.user.id,
-      must_change_password: true,
-    }).eq("id", student_id);
-
     return new Response(
-      JSON.stringify({ success: true, user_id: newUser.user.id, email }),
+      JSON.stringify({ success: true, user_id: newUser.user.id }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {

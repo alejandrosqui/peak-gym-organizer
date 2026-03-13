@@ -20,7 +20,7 @@ const roleLabels: Record<string, string> = {
 };
 
 const UserManagement: React.FC = () => {
-  const { isOwner } = useAuth();
+  const { isOwner, gymId } = useAuth();
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -37,11 +37,16 @@ const UserManagement: React.FC = () => {
   if (!isOwner) return <Navigate to="/dashboard" replace />;
 
   const handleCreateUser = async () => {
-    const { data, error } = await supabase.auth.signUp({ email: form.email, password: form.password });
-    if (error) { toast.error(error.message); return; }
-    if (data.user) {
-      await supabase.from('user_roles').insert({ user_id: data.user.id, role: form.role });
+    try {
+      const { data, error } = await supabase.functions.invoke('create-staff-user', {
+        body: { email: form.email, password: form.password, role: form.role, gym_id: gymId },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
       toast.success('Usuario creado');
+    } catch (err: any) {
+      toast.error(err.message || 'Error al crear usuario');
+      return;
     }
     setDialogOpen(false); setForm({ email: '', password: '', role: 'manager' }); fetchUsers();
   };
@@ -67,9 +72,8 @@ const UserManagement: React.FC = () => {
                 <Select value={form.role} onValueChange={v => setForm({ ...form, role: v as AppRole })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="owner">Dueño</SelectItem>
                     <SelectItem value="manager">Encargado</SelectItem>
-                    <SelectItem value="student">Alumno</SelectItem>
+                    <SelectItem value="staff">Staff</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -107,7 +111,6 @@ const UserManagement: React.FC = () => {
                     <SelectContent>
                       <SelectItem value="owner">Dueño</SelectItem>
                       <SelectItem value="manager">Encargado</SelectItem>
-                      <SelectItem value="student">Alumno</SelectItem>
                     </SelectContent>
                   </Select>
                 </TableCell>

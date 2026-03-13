@@ -47,7 +47,8 @@ const Payments: React.FC = () => {
     await supabase.from('payments').insert({
       student_id: form.student_id, amount: Number(form.amount),
       due_date: form.due_date, status: 'pending', payment_method: form.payment_method,
-    });
+      gym_id: gymId,
+    } as any);
     toast.success('Pago registrado');
     setDialogOpen(false); setForm({ student_id: '', amount: '', due_date: '', payment_method: 'cash' }); fetchData();
   };
