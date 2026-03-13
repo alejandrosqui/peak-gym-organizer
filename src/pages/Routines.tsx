@@ -16,7 +16,7 @@ const emptyRoutine = { name: '', goal: 'muscle_gain', level: 'beginner', days_pe
 const emptyExercise = { exercise_name: '', sets: '3', reps: '12', rest_seconds: '60', observations: '' };
 
 const Routines: React.FC = () => {
-  const { isOwner } = useAuth();
+  const { isOwner, gymId } = useAuth();
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
