@@ -31,7 +31,7 @@ const studentNav = [
 
 const adminItems = [
   { title: 'Usuarios', url: '/users', icon: Settings },
-  { title: 'Configuración', url: '/settings', icon: Settings },
+  { title: 'Configuración', url: '/settings', icon: Wrench },
 ];
 
 function AppSidebarContent() {
