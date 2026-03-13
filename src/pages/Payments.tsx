@@ -10,26 +10,36 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, CheckCircle, DollarSign, AlertTriangle } from 'lucide-react';
+import { Plus, CheckCircle, DollarSign, AlertTriangle, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
+
+interface StudentBasic { id: string; full_name: string; phone: string | null; due_day: number; }
 
 const Payments: React.FC = () => {
   const { isOwner } = useAuth();
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [students, setStudents] = useState<{ id: string; full_name: string }[]>([]);
+  const [payments, setPayments] = useState<(Payment & { student_phone?: string | null })[]>([]);
+  const [students, setStudents] = useState<StudentBasic[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [paymentLink, setPaymentLink] = useState('');
   const [form, setForm] = useState({ student_id: '', amount: '', due_date: '', payment_method: 'cash' });
 
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
-    const [paymentsRes, studentsRes] = await Promise.all([
-      supabase.from('payments').select('*, students(full_name)').order('due_date', { ascending: false }),
-      supabase.from('students').select('id, full_name').eq('status', 'active').order('full_name'),
+    const [paymentsRes, studentsRes, settingsRes] = await Promise.all([
+      supabase.from('payments').select('*, students(full_name, phone)').order('due_date', { ascending: false }),
+      supabase.from('students').select('id, full_name, phone, due_day').eq('status', 'active').order('full_name'),
+      supabase.from('gym_settings').select('value').eq('key', 'payment_link').single(),
     ]);
-    setPayments((paymentsRes.data || []).map((p: any) => ({ ...p, student_name: p.students?.full_name || 'Desconocido' })));
+    setPayments((paymentsRes.data || []).map((p: any) => ({
+      ...p,
+      student_name: p.students?.full_name || 'Desconocido',
+      student_phone: p.students?.phone || null,
+    })));
     setStudents(studentsRes.data || []);
+    setPaymentLink(settingsRes.data?.value || '');
     setLoading(false);
   };
 
@@ -47,19 +57,42 @@ const Payments: React.FC = () => {
     toast.success('Marcado como pagado'); fetchData();
   };
 
+  const sendWhatsAppReminder = (payment: Payment & { student_phone?: string | null }) => {
+    const phone = payment.student_phone?.replace(/\D/g, '');
+    if (!phone) { toast.error('El alumno no tiene teléfono registrado'); return; }
+
+    const linkSection = paymentLink ? `\n👉 ${paymentLink}` : '';
+    const message = `Hola ${payment.student_name}, te recordamos que tu cuota del gimnasio vence el ${payment.due_date}.\n\nEl valor de este mes es $${Number(payment.amount).toLocaleString()}.\n\nPodés pagar de estas maneras:\n1️⃣ En recepción del gimnasio\n2️⃣ Por transferencia\n3️⃣ Con el link de pago${linkSection}\n\n¡Gracias!`;
+
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const getRowClass = (payment: Payment) => {
+    if (payment.status === 'paid') return '';
+    if (payment.status === 'overdue') return 'row-danger';
+    // Check if due in 3 days or less
+    const dueDate = new Date(payment.due_date + 'T00:00:00');
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const diffDays = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 3 && diffDays >= 0) return 'row-warning';
+    return 'table-row-striped';
+  };
+
   const totalPaid = payments.filter(p => p.status === 'paid').reduce((s, p) => s + Number(p.amount), 0);
   const totalPending = payments.filter(p => p.status !== 'paid').reduce((s, p) => s + Number(p.amount), 0);
   const overdueCount = payments.filter(p => p.status === 'overdue').length;
 
   const statusBadge = (status: string) => {
-    const map: Record<string, { cls: string; label: string }> = {
-      paid: { cls: 'bg-success/15 text-success border-success/30', label: 'Pagado' },
-      pending: { cls: 'bg-warning/15 text-warning border-warning/30', label: 'Pendiente' },
-      overdue: { cls: 'bg-destructive/15 text-destructive border-destructive/30', label: 'Vencido' },
+    const map: Record<string, { cls: string; label: string; emoji: string }> = {
+      paid: { cls: 'bg-success/15 text-success border-success/30', label: 'Pagado', emoji: '🟢' },
+      pending: { cls: 'bg-warning/15 text-warning border-warning/30', label: 'Por vencer', emoji: '🟡' },
+      overdue: { cls: 'bg-destructive/15 text-destructive border-destructive/30', label: 'Moroso', emoji: '🔴' },
     };
-    const { cls, label } = map[status] || map.pending;
-    return <Badge variant="outline" className={cls}>{label}</Badge>;
+    const { cls, label, emoji } = map[status] || map.pending;
+    return <Badge variant="outline" className={cls}>{emoji} {label}</Badge>;
   };
+
+  const filtered = payments.filter(p => filterStatus === 'all' || p.status === filterStatus);
 
   return (
     <div>
@@ -87,6 +120,7 @@ const Payments: React.FC = () => {
                     <SelectItem value="cash">Efectivo</SelectItem>
                     <SelectItem value="transfer">Transferencia</SelectItem>
                     <SelectItem value="card">Tarjeta</SelectItem>
+                    <SelectItem value="online">Pago online</SelectItem>
                     <SelectItem value="other">Otro</SelectItem>
                   </SelectContent>
                 </Select>
@@ -97,7 +131,7 @@ const Payments: React.FC = () => {
         </Dialog>
       </div>
 
-      {/* Summary cards - financial ones only for owner */}
+      {/* Summary cards */}
       <div className={`grid grid-cols-1 ${isOwner ? 'sm:grid-cols-3' : 'sm:grid-cols-1'} gap-4 mb-6`}>
         {isOwner && (
           <Card>
@@ -126,6 +160,25 @@ const Payments: React.FC = () => {
         </Card>
       </div>
 
+      {/* Quick filters */}
+      <div className="flex gap-2 mb-4 flex-wrap">
+        {[
+          { value: 'all', label: 'Todos' },
+          { value: 'pending', label: '🟡 Por vencer' },
+          { value: 'overdue', label: '🔴 Morosos' },
+          { value: 'paid', label: '🟢 Pagados' },
+        ].map(f => (
+          <Button
+            key={f.value}
+            variant={filterStatus === f.value ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setFilterStatus(f.value)}
+          >
+            {f.label}
+          </Button>
+        ))}
+      </div>
+
       <div className="border rounded-lg overflow-auto bg-card">
         <Table>
           <TableHeader>
@@ -142,10 +195,10 @@ const Payments: React.FC = () => {
           <TableBody>
             {loading ? (
               <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Cargando...</TableCell></TableRow>
-            ) : payments.length === 0 ? (
+            ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No hay pagos registrados</TableCell></TableRow>
-            ) : payments.map(payment => (
-              <TableRow key={payment.id} className="table-row-striped">
+            ) : filtered.map(payment => (
+              <TableRow key={payment.id} className={getRowClass(payment)}>
                 <TableCell className="font-medium">{payment.student_name}</TableCell>
                 <TableCell>${Number(payment.amount).toLocaleString()}</TableCell>
                 <TableCell>{payment.due_date}</TableCell>
@@ -153,11 +206,18 @@ const Payments: React.FC = () => {
                 <TableCell className="hidden md:table-cell capitalize">{payment.payment_method || '-'}</TableCell>
                 <TableCell className="hidden md:table-cell">{payment.payment_date || '-'}</TableCell>
                 <TableCell className="text-right">
-                  {payment.status !== 'paid' && (
-                    <Button variant="ghost" size="sm" onClick={() => handleMarkPaid(payment)} className="text-success hover:text-success">
-                      <CheckCircle className="h-4 w-4 mr-1" /> Pagar
-                    </Button>
-                  )}
+                  <div className="flex justify-end gap-1">
+                    {payment.status !== 'paid' && (
+                      <>
+                        <Button variant="ghost" size="icon" onClick={() => sendWhatsAppReminder(payment)} title="Enviar recordatorio por WhatsApp" className="text-success hover:text-success">
+                          <MessageCircle className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleMarkPaid(payment)} className="text-success hover:text-success">
+                          <CheckCircle className="h-4 w-4 mr-1" /> Pagar
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Search, Edit, Trash2, AlertTriangle, UserCheck, UserX, KeyRound } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, AlertTriangle, UserCheck, UserX, KeyRound, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const emptyStudent = {
