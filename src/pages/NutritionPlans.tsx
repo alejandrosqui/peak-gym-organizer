@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 const emptyPlan = { name: '', goal: 'muscle_gain', estimated_calories: '', daily_protein: '', suggested_meals: '', suggested_supplements: '', description: '' };
 
 const NutritionPlans: React.FC = () => {
-  const { isOwner } = useAuth();
+  const { isOwner, gymId } = useAuth();
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
