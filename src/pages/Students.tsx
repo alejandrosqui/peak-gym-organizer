@@ -40,6 +40,7 @@ const Students: React.FC = () => {
   const [portalEmail, setPortalEmail] = useState('');
   const [portalPassword, setPortalPassword] = useState('');
   const [portalLoading, setPortalLoading] = useState(false);
+  const [paymentLink, setPaymentLink] = useState('');
 
   useEffect(() => { fetchStudents(); }, []);
 
