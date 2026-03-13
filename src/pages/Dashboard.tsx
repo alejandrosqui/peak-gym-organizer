@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Users, AlertTriangle, CreditCard, DollarSign, Clock, Dumbbell } from 'lucide-react';
 
 interface DashboardStats {
@@ -14,7 +15,7 @@ interface DashboardStats {
 }
 
 const Dashboard: React.FC = () => {
-  const { isOwner, isManager } = useAuth();
+  const { isOwner, isManager, gymName } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     activeStudents: 0, overdueStudents: 0, paymentsThisMonth: 0,
     revenueThisMonth: 0, dueSoonStudents: 0, noRoutineStudents: 0,
@@ -57,7 +58,6 @@ const Dashboard: React.FC = () => {
     return <div className="flex items-center justify-center h-64 text-muted-foreground">Cargando dashboard...</div>;
   }
 
-  // Owner: full financial + operational dashboard
   const ownerCards = [
     { title: 'Alumnos Activos', value: stats.activeStudents, icon: Users, color: 'text-primary' },
     { title: 'Cuotas Vencidas', value: stats.overdueStudents, icon: AlertTriangle, color: 'text-destructive' },
@@ -67,7 +67,6 @@ const Dashboard: React.FC = () => {
     { title: 'Sin Rutina', value: stats.noRoutineStudents, icon: Dumbbell, color: 'text-muted-foreground' },
   ];
 
-  // Manager: operational only, no financial metrics
   const managerCards = [
     { title: 'Alumnos Activos', value: stats.activeStudents, icon: Users, color: 'text-primary' },
     { title: 'Cuotas Vencidas', value: stats.overdueStudents, icon: AlertTriangle, color: 'text-destructive' },
@@ -80,7 +79,10 @@ const Dashboard: React.FC = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6 text-foreground">{title}</h1>
+      <div className="flex items-center gap-3 mb-6">
+        <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+        {gymName && <Badge variant="outline" className="text-sm">{gymName}</Badge>}
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {cards.map(card => (
           <Card key={card.title} className="border shadow-sm hover:shadow-md transition-shadow">

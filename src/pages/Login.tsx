@@ -47,10 +47,11 @@ const Login: React.FC = () => {
               {loading ? <Loader2 className="animate-spin" /> : 'Iniciar Sesión'}
             </Button>
           </form>
-          <div className="mt-6 p-3 rounded-lg bg-muted space-y-1">
-            <p className="text-xs text-muted-foreground text-center font-semibold">Demo:</p>
-            <p className="text-xs text-muted-foreground text-center">Dueño: admin@gmail.com / admin123</p>
-            <p className="text-xs text-muted-foreground text-center">Encargado: staff@gmail.com / staff123</p>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              ¿No tenés cuenta?{' '}
+              <a href="/register" className="text-primary hover:underline font-medium">Registrar gimnasio</a>
+            </p>
           </div>
         </CardContent>
       </Card>

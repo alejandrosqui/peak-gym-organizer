@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
 import Login from "./pages/Login";
+import RegisterGym from "./pages/RegisterGym";
 import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import Payments from "./pages/Payments";
@@ -23,11 +24,9 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: strin
   if (loading) return <div className="flex items-center justify-center min-h-screen text-muted-foreground">Cargando...</div>;
   if (!user) return <Navigate to="/login" replace />;
   
-  // Check role-based access
   if (allowedRoles && role) {
     const normalizedRole = isOwner ? 'owner' : isManager ? 'manager' : isStudent ? 'student' : role;
     if (!allowedRoles.includes(normalizedRole)) {
-      // Redirect to appropriate default page
       if (isStudent) return <Navigate to="/my-portal" replace />;
       return <Navigate to="/dashboard" replace />;
     }
@@ -63,6 +62,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/register" element={<PublicRoute><RegisterGym /></PublicRoute>} />
             <Route path="/" element={<DefaultRedirect />} />
             <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Dashboard /></ProtectedRoute>} />
             <Route path="/students" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Students /></ProtectedRoute>} />
