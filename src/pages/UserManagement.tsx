@@ -26,7 +26,7 @@ const UserManagement: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ email: '', password: '', role: 'manager' as AppRole });
 
-  useEffect(() => { if (isOwner) fetchUsers(); }, [isOwner]);
+  useEffect(() => { if (isOwner && gymId) fetchUsers(); }, [isOwner, gymId]);
 
   const fetchUsers = async () => {
     if (!gymId) { setLoading(false); return; }

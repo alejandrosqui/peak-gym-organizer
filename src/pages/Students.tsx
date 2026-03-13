@@ -108,6 +108,20 @@ const Students: React.FC = () => {
       await supabase.from('students').update(payload).eq('id', editing.id);
       toast.success('Alumno actualizado');
     } else {
+      // Check plan limit before creating
+      if (gymId) {
+        const [gymRes, countRes] = await Promise.all([
+          supabase.from('gyms' as any).select('plan, max_students').eq('id', gymId).single(),
+          supabase.from('students').select('id', { count: 'exact', head: true }).eq('gym_id', gymId),
+        ]);
+        const gym = gymRes.data as any;
+        const currentCount = countRes.count || 0;
+        if (gym && gym.max_students !== -1 && currentCount >= gym.max_students) {
+          toast.error(`Límite de alumnos alcanzado (${gym.max_students}). Actualizá al plan Pro para agregar más.`);
+          return;
+        }
+      }
+
       const { data: newStudent, error } = await supabase.from('students').insert(payload).select().single();
       if (error) { toast.error('Error al crear alumno'); return; }
       toast.success('Alumno creado');

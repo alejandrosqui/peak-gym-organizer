@@ -56,12 +56,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    let initialSessionHandled = false;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          setTimeout(() => fetchRole(session.user.id), 0);
+          // Avoid duplicate fetch when both getSession and onAuthStateChange fire
+          if (!initialSessionHandled) {
+            initialSessionHandled = true;
+            setTimeout(() => fetchRole(session.user.id), 0);
+          } else {
+            setTimeout(() => fetchRole(session.user.id), 0);
+          }
         } else {
           setRole(null);
           setStudentId(null);
@@ -73,12 +81,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchRole(session.user.id);
+      if (!initialSessionHandled) {
+        initialSessionHandled = true;
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchRole(session.user.id);
+        }
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
