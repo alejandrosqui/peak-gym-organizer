@@ -45,9 +45,16 @@ const Students: React.FC = () => {
   useEffect(() => { fetchStudents(); }, []);
 
   const fetchStudents = async () => {
-    const { data: studentsData } = await supabase.from('students').select('*').order('full_name');
-    const { data: routineData } = await supabase.from('student_routines').select('student_id, routines(name)');
-    const { data: planData } = await supabase.from('student_nutrition_plans').select('student_id, nutrition_plans(name)');
+    const [studentsRes, routineRes, planRes, settingsRes] = await Promise.all([
+      supabase.from('students').select('*').order('full_name'),
+      supabase.from('student_routines').select('student_id, routines(name)'),
+      supabase.from('student_nutrition_plans').select('student_id, nutrition_plans(name)'),
+      supabase.from('gym_settings').select('value').eq('key', 'payment_link').single(),
+    ]);
+    const studentsData = studentsRes.data;
+    const routineData = routineRes.data;
+    const planData = planRes.data;
+    setPaymentLink(settingsRes.data?.value || '');
 
     const routineMap = new Map((routineData || []).map((r: any) => [r.student_id, r.routines?.name]));
     const planMap = new Map((planData || []).map((p: any) => [p.student_id, p.nutrition_plans?.name]));
