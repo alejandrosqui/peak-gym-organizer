@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Users, AlertTriangle, CreditCard, DollarSign, Clock, Dumbbell } from 'lucide-react';
+import DailyReminders from '@/components/DailyReminders';
 
 interface DashboardStats {
   activeStudents: number;
@@ -95,6 +96,11 @@ const Dashboard: React.FC = () => {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Daily Reminders Section */}
+      <div className="mt-8">
+        <DailyReminders />
       </div>
     </div>
   );
