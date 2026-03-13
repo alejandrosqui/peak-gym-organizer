@@ -45,16 +45,19 @@ Deno.serve(async (req) => {
     if (studentErr || !student) throw new Error("Student not found");
     if (student.user_id) throw new Error("Student already has portal access");
 
-    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-    const emailExists = existingUsers?.users?.find((u: any) => u.email === email);
-    if (emailExists) throw new Error("Email already registered");
-
+    // Try to create the user directly; handle duplicate email gracefully
     const { data: newUser, error: createErr } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
     });
-    if (createErr) throw new Error(createErr.message);
+
+    if (createErr) {
+      if (createErr.message?.includes("already been registered") || createErr.message?.includes("already exists")) {
+        throw new Error("Este email ya está registrado en el sistema. Usá otro email o contactá al administrador.");
+      }
+      throw new Error(createErr.message);
+    }
 
     await supabaseAdmin.from("user_roles").insert({
       user_id: newUser.user.id,
