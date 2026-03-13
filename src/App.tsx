@@ -53,6 +53,23 @@ const DefaultRedirect: React.FC = () => {
   return <Navigate to="/dashboard" replace />;
 };
 
+const AppRoutes: React.FC = () => (
+  <Routes>
+    <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+    <Route path="/register" element={<PublicRoute><RegisterGym /></PublicRoute>} />
+    <Route path="/" element={<DefaultRedirect />} />
+    <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Dashboard /></ProtectedRoute>} />
+    <Route path="/students" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Students /></ProtectedRoute>} />
+    <Route path="/payments" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Payments /></ProtectedRoute>} />
+    <Route path="/routines" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Routines /></ProtectedRoute>} />
+    <Route path="/nutrition" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><NutritionPlans /></ProtectedRoute>} />
+    <Route path="/users" element={<ProtectedRoute allowedRoles={['owner']}><UserManagement /></ProtectedRoute>} />
+    <Route path="/settings" element={<ProtectedRoute allowedRoles={['owner']}><Settings /></ProtectedRoute>} />
+    <Route path="/my-portal" element={<ProtectedRoute allowedRoles={['student']}><StudentPortal /></ProtectedRoute>} />
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -60,20 +77,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-            <Route path="/register" element={<PublicRoute><RegisterGym /></PublicRoute>} />
-            <Route path="/" element={<DefaultRedirect />} />
-            <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Dashboard /></ProtectedRoute>} />
-            <Route path="/students" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Students /></ProtectedRoute>} />
-            <Route path="/payments" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Payments /></ProtectedRoute>} />
-            <Route path="/routines" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Routines /></ProtectedRoute>} />
-            <Route path="/nutrition" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><NutritionPlans /></ProtectedRoute>} />
-            <Route path="/users" element={<ProtectedRoute allowedRoles={['owner']}><UserManagement /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute allowedRoles={['owner']}><Settings /></ProtectedRoute>} />
-            <Route path="/my-portal" element={<ProtectedRoute allowedRoles={['student']}><StudentPortal /></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AppRoutes />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
