@@ -219,6 +219,16 @@ const Payments: React.FC = () => {
                 <TableCell className="font-medium">{payment.student_name}</TableCell>
                 <TableCell>${Number(payment.amount).toLocaleString()}</TableCell>
                 <TableCell>{payment.due_date}</TableCell>
+                <TableCell>
+                  {payment.status === 'paid' ? (
+                    <span className="text-muted-foreground">—</span>
+                  ) : (() => {
+                    const days = getDaysDiff(payment.due_date);
+                    if (days > 0) return <span className="text-destructive font-semibold">{days}d atraso</span>;
+                    if (days === 0) return <span className="text-warning font-semibold">Hoy</span>;
+                    return <span className="text-muted-foreground">{Math.abs(days)}d restantes</span>;
+                  })()}
+                </TableCell>
                 <TableCell>{statusBadge(payment.status)}</TableCell>
                 <TableCell className="hidden md:table-cell capitalize">{payment.payment_method || '-'}</TableCell>
                 <TableCell className="hidden md:table-cell">{payment.payment_date || '-'}</TableCell>
