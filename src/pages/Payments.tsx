@@ -92,7 +92,23 @@ const Payments: React.FC = () => {
     return <Badge variant="outline" className={cls}>{emoji} {label}</Badge>;
   };
 
-  const filtered = payments.filter(p => filterStatus === 'all' || p.status === filterStatus);
+  const getDaysDiff = (dueDate: string) => {
+    const due = new Date(dueDate + 'T00:00:00');
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    return Math.ceil((today.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
+  };
+
+  const statusOrder: Record<string, number> = { overdue: 0, pending: 1, paid: 2 };
+
+  const filtered = payments
+    .filter(p => filterStatus === 'all' || p.status === filterStatus)
+    .sort((a, b) => {
+      const orderDiff = (statusOrder[a.status] ?? 1) - (statusOrder[b.status] ?? 1);
+      if (orderDiff !== 0) return orderDiff;
+      // Within same status: overdue by most days first, pending by soonest due first
+      if (a.status === 'overdue') return getDaysDiff(b.due_date) - getDaysDiff(a.due_date);
+      return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+    });
 
   return (
     <div>
