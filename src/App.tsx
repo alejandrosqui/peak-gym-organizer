@@ -12,22 +12,45 @@ import Payments from "./pages/Payments";
 import Routines from "./pages/Routines";
 import NutritionPlans from "./pages/NutritionPlans";
 import UserManagement from "./pages/UserManagement";
+import StudentPortal from "./pages/StudentPortal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth();
+const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: string[] }> = ({ children, allowedRoles }) => {
+  const { user, loading, role, isOwner, isManager, isStudent } = useAuth();
   if (loading) return <div className="flex items-center justify-center min-h-screen text-muted-foreground">Cargando...</div>;
   if (!user) return <Navigate to="/login" replace />;
+  
+  // Check role-based access
+  if (allowedRoles && role) {
+    const normalizedRole = isOwner ? 'owner' : isManager ? 'manager' : isStudent ? 'student' : role;
+    if (!allowedRoles.includes(normalizedRole)) {
+      // Redirect to appropriate default page
+      if (isStudent) return <Navigate to="/my-portal" replace />;
+      return <Navigate to="/dashboard" replace />;
+    }
+  }
+  
   return <AppLayout>{children}</AppLayout>;
 };
 
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, isStudent } = useAuth();
   if (loading) return <div className="flex items-center justify-center min-h-screen text-muted-foreground">Cargando...</div>;
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) {
+    if (isStudent) return <Navigate to="/my-portal" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
   return <>{children}</>;
+};
+
+const DefaultRedirect: React.FC = () => {
+  const { user, loading, isStudent } = useAuth();
+  if (loading) return <div className="flex items-center justify-center min-h-screen text-muted-foreground">Cargando...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+  if (isStudent) return <Navigate to="/my-portal" replace />;
+  return <Navigate to="/dashboard" replace />;
 };
 
 const App = () => (
@@ -39,13 +62,14 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
-            <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
-            <Route path="/routines" element={<ProtectedRoute><Routines /></ProtectedRoute>} />
-            <Route path="/nutrition" element={<ProtectedRoute><NutritionPlans /></ProtectedRoute>} />
-            <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+            <Route path="/" element={<DefaultRedirect />} />
+            <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Dashboard /></ProtectedRoute>} />
+            <Route path="/students" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Students /></ProtectedRoute>} />
+            <Route path="/payments" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Payments /></ProtectedRoute>} />
+            <Route path="/routines" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Routines /></ProtectedRoute>} />
+            <Route path="/nutrition" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><NutritionPlans /></ProtectedRoute>} />
+            <Route path="/users" element={<ProtectedRoute allowedRoles={['owner']}><UserManagement /></ProtectedRoute>} />
+            <Route path="/my-portal" element={<ProtectedRoute allowedRoles={['student']}><StudentPortal /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
