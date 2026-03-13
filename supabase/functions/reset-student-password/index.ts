@@ -31,9 +31,9 @@ Deno.serve(async (req) => {
     const { data: isStaff } = await supabaseAdmin.rpc("is_staff_or_owner", { _user_id: caller.id });
     if (!isStaff) throw new Error("Unauthorized");
 
-    const { student_id, email, password } = await req.json();
-    if (!student_id || !email || !password) {
-      throw new Error("student_id, email, and password are required");
+    const { student_id, new_password } = await req.json();
+    if (!student_id || !new_password) {
+      throw new Error("student_id and new_password are required");
     }
 
     const { data: student, error: studentErr } = await supabaseAdmin
@@ -43,32 +43,20 @@ Deno.serve(async (req) => {
       .single();
 
     if (studentErr || !student) throw new Error("Student not found");
-    if (student.user_id) throw new Error("Student already has portal access");
+    if (!student.user_id) throw new Error("Student has no portal access");
 
-    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-    const emailExists = existingUsers?.users?.find((u: any) => u.email === email);
-    if (emailExists) throw new Error("Email already registered");
+    // Reset password
+    const { error: updateErr } = await supabaseAdmin.auth.admin.updateUserById(
+      student.user_id,
+      { password: new_password }
+    );
+    if (updateErr) throw new Error(updateErr.message);
 
-    const { data: newUser, error: createErr } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
-    if (createErr) throw new Error(createErr.message);
-
-    await supabaseAdmin.from("user_roles").insert({
-      user_id: newUser.user.id,
-      role: "student",
-    });
-
-    // Link student record and set must_change_password flag
-    await supabaseAdmin.from("students").update({ 
-      user_id: newUser.user.id,
-      must_change_password: true,
-    }).eq("id", student_id);
+    // Set must_change_password flag
+    await supabaseAdmin.from("students").update({ must_change_password: true }).eq("id", student_id);
 
     return new Response(
-      JSON.stringify({ success: true, user_id: newUser.user.id, email }),
+      JSON.stringify({ success: true }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
