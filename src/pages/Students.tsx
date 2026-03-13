@@ -51,6 +51,10 @@ const Students: React.FC = () => {
   const [resetTarget, setResetTarget] = useState<Student | null>(null);
   const [resetPassword, setResetPassword] = useState('');
 
+  // DEV TOOL: Simulated student count override (remove for production)
+  const isDev = import.meta.env.DEV;
+  const [devSimCount, setDevSimCount] = useState<number | null>(null);
+
   useEffect(() => { fetchStudents(); }, []);
 
   const fetchStudents = async () => {
@@ -115,9 +119,9 @@ const Students: React.FC = () => {
           supabase.from('students').select('id', { count: 'exact', head: true }).eq('gym_id', gymId),
         ]);
         const gym = gymRes.data as any;
-        const currentCount = countRes.count || 0;
+        const currentCount = devSimCount !== null ? devSimCount : (countRes.count || 0);
         if (gym && gym.max_students !== -1 && currentCount >= gym.max_students) {
-          toast.error(`Límite de alumnos alcanzado (${gym.max_students}). Actualizá al plan Pro para agregar más.`);
+          toast.error(`Has alcanzado el límite de ${gym.max_students} alumnos del plan Free. Actualiza a Pro para seguir agregando alumnos.`);
           return;
         }
       }
@@ -333,6 +337,31 @@ const Students: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* DEV TOOL: Simular conteo de alumnos - REMOVER EN PRODUCCIÓN */}
+      {isDev && (
+        <div className="mb-4 p-3 border-2 border-dashed border-yellow-500 rounded-lg bg-yellow-500/10">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-400">🧪 DEV: Simular conteo de alumnos</span>
+            <Input
+              type="number"
+              min={0}
+              className="w-24 h-8 text-sm"
+              placeholder="Ej: 24"
+              value={devSimCount ?? ''}
+              onChange={e => setDevSimCount(e.target.value === '' ? null : Number(e.target.value))}
+            />
+            <span className="text-xs text-muted-foreground">
+              {devSimCount !== null ? `Simulando ${devSimCount} alumnos` : 'Sin simulación (conteo real)'}
+            </span>
+            {devSimCount !== null && (
+              <Button variant="outline" size="sm" onClick={() => setDevSimCount(null)} className="h-7 text-xs">
+                Desactivar
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1">
