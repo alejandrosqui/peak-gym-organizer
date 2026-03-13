@@ -51,6 +51,10 @@ const Students: React.FC = () => {
   const [resetTarget, setResetTarget] = useState<Student | null>(null);
   const [resetPassword, setResetPassword] = useState('');
 
+  // DEV TOOL: Simulated student count override (remove for production)
+  const isDev = import.meta.env.DEV;
+  const [devSimCount, setDevSimCount] = useState<number | null>(null);
+
   useEffect(() => { fetchStudents(); }, []);
 
   const fetchStudents = async () => {
