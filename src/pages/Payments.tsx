@@ -92,7 +92,23 @@ const Payments: React.FC = () => {
     return <Badge variant="outline" className={cls}>{emoji} {label}</Badge>;
   };
 
-  const filtered = payments.filter(p => filterStatus === 'all' || p.status === filterStatus);
+  const getDaysDiff = (dueDate: string) => {
+    const due = new Date(dueDate + 'T00:00:00');
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    return Math.ceil((today.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
+  };
+
+  const statusOrder: Record<string, number> = { overdue: 0, pending: 1, paid: 2 };
+
+  const filtered = payments
+    .filter(p => filterStatus === 'all' || p.status === filterStatus)
+    .sort((a, b) => {
+      const orderDiff = (statusOrder[a.status] ?? 1) - (statusOrder[b.status] ?? 1);
+      if (orderDiff !== 0) return orderDiff;
+      // Within same status: overdue by most days first, pending by soonest due first
+      if (a.status === 'overdue') return getDaysDiff(b.due_date) - getDaysDiff(a.due_date);
+      return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+    });
 
   return (
     <div>
@@ -186,6 +202,7 @@ const Payments: React.FC = () => {
               <TableHead>Alumno</TableHead>
               <TableHead>Monto</TableHead>
               <TableHead>Vencimiento</TableHead>
+              <TableHead>Días</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead className="hidden md:table-cell">Método</TableHead>
               <TableHead className="hidden md:table-cell">Último pago</TableHead>
@@ -194,14 +211,24 @@ const Payments: React.FC = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Cargando...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Cargando...</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No hay pagos registrados</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No hay pagos registrados</TableCell></TableRow>
             ) : filtered.map(payment => (
               <TableRow key={payment.id} className={getRowClass(payment)}>
                 <TableCell className="font-medium">{payment.student_name}</TableCell>
                 <TableCell>${Number(payment.amount).toLocaleString()}</TableCell>
                 <TableCell>{payment.due_date}</TableCell>
+                <TableCell>
+                  {payment.status === 'paid' ? (
+                    <span className="text-muted-foreground">—</span>
+                  ) : (() => {
+                    const days = getDaysDiff(payment.due_date);
+                    if (days > 0) return <span className="text-destructive font-semibold">{days}d atraso</span>;
+                    if (days === 0) return <span className="text-warning font-semibold">Hoy</span>;
+                    return <span className="text-muted-foreground">{Math.abs(days)}d restantes</span>;
+                  })()}
+                </TableCell>
                 <TableCell>{statusBadge(payment.status)}</TableCell>
                 <TableCell className="hidden md:table-cell capitalize">{payment.payment_method || '-'}</TableCell>
                 <TableCell className="hidden md:table-cell">{payment.payment_date || '-'}</TableCell>
