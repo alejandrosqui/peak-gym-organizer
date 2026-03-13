@@ -14,16 +14,326 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      nutrition_plans: {
+        Row: {
+          created_at: string
+          daily_protein: string | null
+          description: string | null
+          estimated_calories: number | null
+          goal: string
+          id: string
+          name: string
+          suggested_meals: string | null
+          suggested_supplements: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_protein?: string | null
+          description?: string | null
+          estimated_calories?: number | null
+          goal: string
+          id?: string
+          name: string
+          suggested_meals?: string | null
+          suggested_supplements?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_protein?: string | null
+          description?: string | null
+          estimated_calories?: number | null
+          goal?: string
+          id?: string
+          name?: string
+          suggested_meals?: string | null
+          suggested_supplements?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string
+          id: string
+          notes: string | null
+          payment_date: string | null
+          payment_method: string | null
+          status: string
+          student_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          due_date: string
+          id?: string
+          notes?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          status?: string
+          student_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          status?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routine_exercises: {
+        Row: {
+          created_at: string
+          exercise_name: string
+          id: string
+          observations: string | null
+          reps: string
+          rest_seconds: number
+          routine_id: string
+          sets: number
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          exercise_name: string
+          id?: string
+          observations?: string | null
+          reps?: string
+          rest_seconds?: number
+          routine_id: string
+          sets?: number
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          exercise_name?: string
+          id?: string
+          observations?: string | null
+          reps?: string
+          rest_seconds?: number
+          routine_id?: string
+          sets?: number
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routine_exercises_routine_id_fkey"
+            columns: ["routine_id"]
+            isOneToOne: false
+            referencedRelation: "routines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routines: {
+        Row: {
+          created_at: string
+          days_per_week: number
+          description: string | null
+          goal: string
+          id: string
+          level: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          days_per_week?: number
+          description?: string | null
+          goal: string
+          id?: string
+          level: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          days_per_week?: number
+          description?: string | null
+          goal?: string
+          id?: string
+          level?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      student_nutrition_plans: {
+        Row: {
+          assigned_at: string
+          id: string
+          nutrition_plan_id: string
+          student_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          id?: string
+          nutrition_plan_id: string
+          student_id: string
+        }
+        Update: {
+          assigned_at?: string
+          id?: string
+          nutrition_plan_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_nutrition_plans_nutrition_plan_id_fkey"
+            columns: ["nutrition_plan_id"]
+            isOneToOne: false
+            referencedRelation: "nutrition_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_nutrition_plans_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: true
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_routines: {
+        Row: {
+          assigned_at: string
+          id: string
+          routine_id: string
+          student_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          id?: string
+          routine_id: string
+          student_id: string
+        }
+        Update: {
+          assigned_at?: string
+          id?: string
+          routine_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_routines_routine_id_fkey"
+            columns: ["routine_id"]
+            isOneToOne: false
+            referencedRelation: "routines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_routines_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: true
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          age: number | null
+          created_at: string
+          due_day: number
+          email: string | null
+          enrollment_date: string
+          full_name: string
+          height: number | null
+          id: string
+          observations: string | null
+          phone: string | null
+          status: string
+          training_goal: string | null
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          age?: number | null
+          created_at?: string
+          due_day?: number
+          email?: string | null
+          enrollment_date?: string
+          full_name: string
+          height?: number | null
+          id?: string
+          observations?: string | null
+          phone?: string | null
+          status?: string
+          training_goal?: string | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          age?: number | null
+          created_at?: string
+          due_day?: number
+          email?: string | null
+          enrollment_date?: string
+          full_name?: string
+          height?: number | null
+          id?: string
+          observations?: string | null
+          phone?: string | null
+          status?: string
+          training_goal?: string | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +460,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "staff"],
+    },
   },
 } as const
