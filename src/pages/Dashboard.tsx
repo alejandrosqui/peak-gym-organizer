@@ -97,6 +97,11 @@ const Dashboard: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      {/* Daily Reminders Section */}
+      <div className="mt-8">
+        <DailyReminders />
+      </div>
     </div>
   );
 };
