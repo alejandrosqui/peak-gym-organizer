@@ -211,9 +211,9 @@ const Payments: React.FC = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Cargando...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Cargando...</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No hay pagos registrados</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No hay pagos registrados</TableCell></TableRow>
             ) : filtered.map(payment => (
               <TableRow key={payment.id} className={getRowClass(payment)}>
                 <TableCell className="font-medium">{payment.student_name}</TableCell>
