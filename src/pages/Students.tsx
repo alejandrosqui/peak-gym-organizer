@@ -26,7 +26,7 @@ const generatePassword = () => {
 };
 
 const Students: React.FC = () => {
-  const { isOwner, isStaffOrOwner } = useAuth();
+  const { isOwner, isStaffOrOwner, gymId } = useAuth();
   const [students, setStudents] = useState<Student[]>([]);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
