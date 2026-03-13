@@ -119,9 +119,9 @@ const Students: React.FC = () => {
           supabase.from('students').select('id', { count: 'exact', head: true }).eq('gym_id', gymId),
         ]);
         const gym = gymRes.data as any;
-        const currentCount = countRes.count || 0;
+        const currentCount = devSimCount !== null ? devSimCount : (countRes.count || 0);
         if (gym && gym.max_students !== -1 && currentCount >= gym.max_students) {
-          toast.error(`Límite de alumnos alcanzado (${gym.max_students}). Actualizá al plan Pro para agregar más.`);
+          toast.error(`Has alcanzado el límite de ${gym.max_students} alumnos del plan Free. Actualiza a Pro para seguir agregando alumnos.`);
           return;
         }
       }
