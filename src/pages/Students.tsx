@@ -318,6 +318,17 @@ const Students: React.FC = () => {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
+                    {student.phone && (
+                      <Button variant="ghost" size="icon" title="Enviar recordatorio por WhatsApp" className="text-success hover:text-success"
+                        onClick={() => {
+                          const phone = student.phone!.replace(/\D/g, '');
+                          const linkSection = paymentLink ? `\n👉 ${paymentLink}` : '';
+                          const msg = `Hola ${student.full_name}, te recordamos que tu cuota del gimnasio vence el día ${student.due_day} de cada mes.\n\nPodés pagar de estas maneras:\n1️⃣ En recepción del gimnasio\n2️⃣ Por transferencia\n3️⃣ Con el link de pago${linkSection}\n\n¡Gracias!`;
+                          window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+                        }}>
+                        <MessageCircle className="h-4 w-4" />
+                      </Button>
+                    )}
                     {!student.user_id && isStaffOrOwner && (
                       <Button variant="ghost" size="icon" onClick={() => openPortalDialog(student)} title="Crear acceso al portal">
                         <KeyRound className="h-4 w-4" />
