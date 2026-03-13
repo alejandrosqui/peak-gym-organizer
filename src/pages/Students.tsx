@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 const emptyStudent = {
   full_name: '', phone: '', email: '', age: '', weight: '', height: '',
   training_goal: '', enrollment_date: new Date().toISOString().split('T')[0],
-  due_day: '1', status: 'active' as const, observations: '',
+  due_day: '1', status: 'active', observations: '',
 };
 
 const Students: React.FC = () => {

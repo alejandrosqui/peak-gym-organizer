@@ -9,15 +9,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Shield } from 'lucide-react';
+import { Plus, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { Navigate } from 'react-router-dom';
 
 interface UserItem {
   id: string;
-  email: string;
   role: AppRole;
-  created_at: string;
 }
 
 const UserManagement: React.FC = () => {
@@ -25,31 +23,23 @@ const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<UserItem | null>(null);
   const [form, setForm] = useState({ email: '', password: '', role: 'staff' as AppRole });
 
-  if (!isAdmin) return <Navigate to="/dashboard" replace />;
-
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => {
+    if (isAdmin) fetchUsers();
+  }, [isAdmin]);
 
   const fetchUsers = async () => {
     const { data } = await supabase.from('user_roles').select('user_id, role');
     if (data) {
-      // We can't directly query auth.users, so we'll display what we have
-      const userItems: UserItem[] = data.map(d => ({
-        id: d.user_id,
-        email: '',
-        role: d.role as AppRole,
-        created_at: '',
-      }));
-      setUsers(userItems);
+      setUsers(data.map(d => ({ id: d.user_id, role: d.role as AppRole })));
     }
     setLoading(false);
   };
 
+  if (!isAdmin) return <Navigate to="/dashboard" replace />;
+
   const handleCreateUser = async () => {
-    // Sign up user via admin functions would be needed in production
-    // For now, we create via supabase auth
     const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
@@ -59,10 +49,7 @@ const UserManagement: React.FC = () => {
       return;
     }
     if (data.user) {
-      await supabase.from('user_roles').insert({
-        user_id: data.user.id,
-        role: form.role,
-      });
+      await supabase.from('user_roles').insert({ user_id: data.user.id, role: form.role });
       toast.success('Usuario creado');
     }
     setDialogOpen(false);
@@ -119,7 +106,7 @@ const UserManagement: React.FC = () => {
             <TableRow className="bg-muted/50">
               <TableHead>ID de Usuario</TableHead>
               <TableHead>Rol</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead className="text-right">Cambiar Rol</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

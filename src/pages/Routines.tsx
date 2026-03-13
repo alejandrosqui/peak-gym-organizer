@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Dumbbell, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 
-const emptyRoutine = { name: '', goal: 'muscle_gain', level: 'beginner' as const, days_per_week: '3', description: '' };
+const emptyRoutine = { name: '', goal: 'muscle_gain', level: 'beginner', days_per_week: '3', description: '' };
 const emptyExercise = { exercise_name: '', sets: '3', reps: '12', rest_seconds: '60', observations: '' };
 
 const Routines: React.FC = () => {
