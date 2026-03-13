@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Student } from '@/types/gym';
 import { Button } from '@/components/ui/button';
@@ -49,7 +49,7 @@ const Students: React.FC = () => {
       nutrition_plan_name: planMap.get(s.id) || null,
     }));
 
-    setStudents(enriched);
+    setStudents(enriched as Student[]);
     setLoading(false);
   };
 
