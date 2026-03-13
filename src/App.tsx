@@ -13,6 +13,7 @@ import Routines from "./pages/Routines";
 import NutritionPlans from "./pages/NutritionPlans";
 import UserManagement from "./pages/UserManagement";
 import StudentPortal from "./pages/StudentPortal";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
