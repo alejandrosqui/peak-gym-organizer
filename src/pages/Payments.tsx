@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 interface StudentBasic { id: string; full_name: string; phone: string | null; due_day: number; }
 
 const Payments: React.FC = () => {
-  const { isOwner } = useAuth();
+  const { isOwner, gymId } = useAuth();
   const [payments, setPayments] = useState<(Payment & { student_phone?: string | null })[]>([]);
   const [students, setStudents] = useState<StudentBasic[]>([]);
   const [loading, setLoading] = useState(true);
