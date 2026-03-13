@@ -18,9 +18,7 @@ const Login: React.FC = () => {
     setLoading(true);
     setError('');
     const { error } = await signIn(email, password);
-    if (error) {
-      setError('Credenciales incorrectas. Intenta de nuevo.');
-    }
+    if (error) setError('Credenciales incorrectas. Intenta de nuevo.');
     setLoading(false);
   };
 
@@ -38,37 +36,21 @@ const Login: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="admin@gmail.com"
-                required
-              />
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@email.com" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-              />
+              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required />
             </div>
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
+            {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? <Loader2 className="animate-spin" /> : 'Iniciar Sesión'}
             </Button>
           </form>
-          <div className="mt-6 p-3 rounded-lg bg-muted">
-            <p className="text-xs text-muted-foreground text-center">
-              <strong>Demo:</strong> admin@gmail.com / admin · staff@gmail.com / staff
-            </p>
+          <div className="mt-6 p-3 rounded-lg bg-muted space-y-1">
+            <p className="text-xs text-muted-foreground text-center font-semibold">Demo:</p>
+            <p className="text-xs text-muted-foreground text-center">Dueño: admin@gmail.com / admin123</p>
+            <p className="text-xs text-muted-foreground text-center">Encargado: staff@gmail.com / staff123</p>
           </div>
         </CardContent>
       </Card>

@@ -13,54 +13,42 @@ import { Plus, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { Navigate } from 'react-router-dom';
 
-interface UserItem {
-  id: string;
-  role: AppRole;
-}
+interface UserItem { id: string; role: AppRole; }
+
+const roleLabels: Record<string, string> = {
+  owner: 'Dueño', manager: 'Encargado', student: 'Alumno', admin: 'Dueño', staff: 'Encargado',
+};
 
 const UserManagement: React.FC = () => {
-  const { isAdmin } = useAuth();
+  const { isOwner } = useAuth();
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ email: '', password: '', role: 'staff' as AppRole });
+  const [form, setForm] = useState({ email: '', password: '', role: 'manager' as AppRole });
 
-  useEffect(() => {
-    if (isAdmin) fetchUsers();
-  }, [isAdmin]);
+  useEffect(() => { if (isOwner) fetchUsers(); }, [isOwner]);
 
   const fetchUsers = async () => {
     const { data } = await supabase.from('user_roles').select('user_id, role');
-    if (data) {
-      setUsers(data.map(d => ({ id: d.user_id, role: d.role as AppRole })));
-    }
+    if (data) setUsers(data.map(d => ({ id: d.user_id, role: d.role as AppRole })));
     setLoading(false);
   };
 
-  if (!isAdmin) return <Navigate to="/dashboard" replace />;
+  if (!isOwner) return <Navigate to="/dashboard" replace />;
 
   const handleCreateUser = async () => {
-    const { data, error } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-    });
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
+    const { data, error } = await supabase.auth.signUp({ email: form.email, password: form.password });
+    if (error) { toast.error(error.message); return; }
     if (data.user) {
       await supabase.from('user_roles').insert({ user_id: data.user.id, role: form.role });
       toast.success('Usuario creado');
     }
-    setDialogOpen(false);
-    setForm({ email: '', password: '', role: 'staff' });
-    fetchUsers();
+    setDialogOpen(false); setForm({ email: '', password: '', role: 'manager' }); fetchUsers();
   };
 
   const handleUpdateRole = async (userId: string, newRole: AppRole) => {
     await supabase.from('user_roles').update({ role: newRole }).eq('user_id', userId);
-    toast.success('Rol actualizado');
-    fetchUsers();
+    toast.success('Rol actualizado'); fetchUsers();
   };
 
   return (
@@ -68,34 +56,25 @@ const UserManagement: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-foreground">Gestión de Usuarios</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button><Plus className="mr-2 h-4 w-4" />Nuevo Usuario</Button>
-          </DialogTrigger>
+          <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" />Nuevo Usuario</Button></DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Crear Usuario</DialogTitle></DialogHeader>
             <div className="space-y-3 mt-4">
-              <div>
-                <Label>Email</Label>
-                <Input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-              </div>
-              <div>
-                <Label>Contraseña</Label>
-                <Input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
-              </div>
+              <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></div>
+              <div><Label>Contraseña</Label><Input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} /></div>
               <div>
                 <Label>Rol</Label>
                 <Select value={form.role} onValueChange={v => setForm({ ...form, role: v as AppRole })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Administrador</SelectItem>
-                    <SelectItem value="staff">Staff</SelectItem>
+                    <SelectItem value="owner">Dueño</SelectItem>
+                    <SelectItem value="manager">Encargado</SelectItem>
+                    <SelectItem value="student">Alumno</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            <Button onClick={handleCreateUser} className="w-full mt-4" disabled={!form.email || !form.password}>
-              Crear Usuario
-            </Button>
+            <Button onClick={handleCreateUser} className="w-full mt-4" disabled={!form.email || !form.password}>Crear Usuario</Button>
           </DialogContent>
         </Dialog>
       </div>
@@ -118,16 +97,17 @@ const UserManagement: React.FC = () => {
               <TableRow key={user.id} className="table-row-striped">
                 <TableCell className="font-mono text-sm">{user.id.substring(0, 8)}...</TableCell>
                 <TableCell>
-                  <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="capitalize">
-                    <Shield className="h-3 w-3 mr-1" />{user.role === 'admin' ? 'Administrador' : 'Staff'}
+                  <Badge variant={user.role === 'owner' || user.role === 'admin' ? 'default' : 'secondary'} className="capitalize">
+                    <Shield className="h-3 w-3 mr-1" />{roleLabels[user.role] || user.role}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <Select value={user.role} onValueChange={v => handleUpdateRole(user.id, v as AppRole)}>
                     <SelectTrigger className="w-36 inline-flex"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="admin">Administrador</SelectItem>
-                      <SelectItem value="staff">Staff</SelectItem>
+                      <SelectItem value="owner">Dueño</SelectItem>
+                      <SelectItem value="manager">Encargado</SelectItem>
+                      <SelectItem value="student">Alumno</SelectItem>
                     </SelectContent>
                   </Select>
                 </TableCell>

@@ -14,14 +14,12 @@ import { Plus, CheckCircle, DollarSign, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Payments: React.FC = () => {
-  const { isAdmin } = useAuth();
+  const { isOwner } = useAuth();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [students, setStudents] = useState<{ id: string; full_name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({
-    student_id: '', amount: '', due_date: '', payment_method: 'cash',
-  });
+  const [form, setForm] = useState({ student_id: '', amount: '', due_date: '', payment_method: 'cash' });
 
   useEffect(() => { fetchData(); }, []);
 
@@ -30,35 +28,23 @@ const Payments: React.FC = () => {
       supabase.from('payments').select('*, students(full_name)').order('due_date', { ascending: false }),
       supabase.from('students').select('id, full_name').eq('status', 'active').order('full_name'),
     ]);
-    setPayments((paymentsRes.data || []).map((p: any) => ({
-      ...p,
-      student_name: p.students?.full_name || 'Desconocido',
-    })));
+    setPayments((paymentsRes.data || []).map((p: any) => ({ ...p, student_name: p.students?.full_name || 'Desconocido' })));
     setStudents(studentsRes.data || []);
     setLoading(false);
   };
 
   const handleCreatePayment = async () => {
     await supabase.from('payments').insert({
-      student_id: form.student_id,
-      amount: Number(form.amount),
-      due_date: form.due_date,
-      status: 'pending',
-      payment_method: form.payment_method,
+      student_id: form.student_id, amount: Number(form.amount),
+      due_date: form.due_date, status: 'pending', payment_method: form.payment_method,
     });
     toast.success('Pago registrado');
-    setDialogOpen(false);
-    setForm({ student_id: '', amount: '', due_date: '', payment_method: 'cash' });
-    fetchData();
+    setDialogOpen(false); setForm({ student_id: '', amount: '', due_date: '', payment_method: 'cash' }); fetchData();
   };
 
   const handleMarkPaid = async (payment: Payment) => {
-    await supabase.from('payments').update({
-      status: 'paid',
-      payment_date: new Date().toISOString().split('T')[0],
-    }).eq('id', payment.id);
-    toast.success('Marcado como pagado');
-    fetchData();
+    await supabase.from('payments').update({ status: 'paid', payment_date: new Date().toISOString().split('T')[0] }).eq('id', payment.id);
+    toast.success('Marcado como pagado'); fetchData();
   };
 
   const totalPaid = payments.filter(p => p.status === 'paid').reduce((s, p) => s + Number(p.amount), 0);
@@ -80,9 +66,7 @@ const Payments: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-foreground">Cuotas y Pagos</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button><Plus className="mr-2 h-4 w-4" />Registrar Pago</Button>
-          </DialogTrigger>
+          <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" />Registrar Pago</Button></DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Nuevo Pago</DialogTitle></DialogHeader>
             <div className="space-y-3 mt-4">
@@ -90,19 +74,11 @@ const Payments: React.FC = () => {
                 <Label>Alumno</Label>
                 <Select value={form.student_id} onValueChange={v => setForm({ ...form, student_id: v })}>
                   <SelectTrigger><SelectValue placeholder="Seleccionar alumno" /></SelectTrigger>
-                  <SelectContent>
-                    {students.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}
-                  </SelectContent>
+                  <SelectContent>{students.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label>Monto</Label>
-                <Input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} />
-              </div>
-              <div>
-                <Label>Fecha de vencimiento</Label>
-                <Input type="date" value={form.due_date} onChange={e => setForm({ ...form, due_date: e.target.value })} />
-              </div>
+              <div><Label>Monto</Label><Input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} /></div>
+              <div><Label>Fecha de vencimiento</Label><Input type="date" value={form.due_date} onChange={e => setForm({ ...form, due_date: e.target.value })} /></div>
               <div>
                 <Label>Método de pago</Label>
                 <Select value={form.payment_method} onValueChange={v => setForm({ ...form, payment_method: v })}>
@@ -116,29 +92,31 @@ const Payments: React.FC = () => {
                 </Select>
               </div>
             </div>
-            <Button onClick={handleCreatePayment} className="w-full mt-4" disabled={!form.student_id || !form.amount || !form.due_date}>
-              Registrar Pago
-            </Button>
+            <Button onClick={handleCreatePayment} className="w-full mt-4" disabled={!form.student_id || !form.amount || !form.due_date}>Registrar Pago</Button>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Cobrado este mes</CardTitle>
-            <DollarSign className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold text-foreground">${totalPaid.toLocaleString()}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pendiente</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold text-foreground">${totalPending.toLocaleString()}</div></CardContent>
-        </Card>
+      {/* Summary cards - financial ones only for owner */}
+      <div className={`grid grid-cols-1 ${isOwner ? 'sm:grid-cols-3' : 'sm:grid-cols-1'} gap-4 mb-6`}>
+        {isOwner && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Cobrado este mes</CardTitle>
+              <DollarSign className="h-4 w-4 text-success" />
+            </CardHeader>
+            <CardContent><div className="text-2xl font-bold text-foreground">${totalPaid.toLocaleString()}</div></CardContent>
+          </Card>
+        )}
+        {isOwner && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Pendiente</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-warning" />
+            </CardHeader>
+            <CardContent><div className="text-2xl font-bold text-foreground">${totalPending.toLocaleString()}</div></CardContent>
+          </Card>
+        )}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Morosos</CardTitle>
@@ -148,7 +126,6 @@ const Payments: React.FC = () => {
         </Card>
       </div>
 
-      {/* Table */}
       <div className="border rounded-lg overflow-auto bg-card">
         <Table>
           <TableHeader>

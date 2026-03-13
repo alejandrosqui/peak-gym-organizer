@@ -1,4 +1,4 @@
-export type AppRole = 'admin' | 'staff';
+export type AppRole = 'owner' | 'manager' | 'student' | 'admin' | 'staff';
 
 export interface Student {
   id: string;
@@ -13,6 +13,7 @@ export interface Student {
   due_day: number;
   status: 'active' | 'inactive' | 'overdue';
   observations: string | null;
+  user_id: string | null;
   created_at: string;
   updated_at: string;
   // joined data

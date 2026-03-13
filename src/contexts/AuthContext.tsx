@@ -10,7 +10,11 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
-  isAdmin: boolean;
+  isOwner: boolean;
+  isManager: boolean;
+  isStudent: boolean;
+  isStaffOrOwner: boolean;
+  studentId: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,12 +23,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
+  const [studentId, setStudentId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchRole = async (userId: string) => {
-    const { data } = await supabase
-      .rpc('get_user_role', { _user_id: userId });
-    setRole(data as AppRole | null);
+    const { data } = await supabase.rpc('get_user_role', { _user_id: userId });
+    const userRole = data as AppRole | null;
+    setRole(userRole);
+
+    // If student role, fetch linked student_id
+    if (userRole === 'student') {
+      const { data: sid } = await supabase.rpc('get_student_id_for_user', { _user_id: userId });
+      setStudentId(sid as string | null);
+    } else {
+      setStudentId(null);
+    }
   };
 
   useEffect(() => {
@@ -36,6 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setTimeout(() => fetchRole(session.user.id), 0);
         } else {
           setRole(null);
+          setStudentId(null);
         }
         setLoading(false);
       }
@@ -63,12 +77,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setSession(null);
     setRole(null);
+    setStudentId(null);
   };
+
+  const isOwner = role === 'owner' || role === 'admin';
+  const isManager = role === 'manager' || role === 'staff';
+  const isStudent = role === 'student';
+  const isStaffOrOwner = isOwner || isManager;
 
   return (
     <AuthContext.Provider value={{
       user, session, role, loading, signIn, signOut,
-      isAdmin: role === 'admin',
+      isOwner, isManager, isStudent, isStaffOrOwner, studentId,
     }}>
       {children}
     </AuthContext.Provider>
