@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      gym_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          value?: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       nutrition_plans: {
         Row: {
           created_at: string
@@ -61,7 +82,9 @@ export type Database = {
           id: string
           notes: string | null
           payment_date: string | null
+          payment_link: string | null
           payment_method: string | null
+          payment_reference: string | null
           status: string
           student_id: string
         }
@@ -72,7 +95,9 @@ export type Database = {
           id?: string
           notes?: string | null
           payment_date?: string | null
+          payment_link?: string | null
           payment_method?: string | null
+          payment_reference?: string | null
           status?: string
           student_id: string
         }
@@ -83,7 +108,9 @@ export type Database = {
           id?: string
           notes?: string | null
           payment_date?: string | null
+          payment_link?: string | null
           payment_method?: string | null
+          payment_reference?: string | null
           status?: string
           student_id?: string
         }
