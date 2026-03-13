@@ -338,6 +338,31 @@ const Students: React.FC = () => {
         </Dialog>
       </div>
 
+      {/* DEV TOOL: Simular conteo de alumnos - REMOVER EN PRODUCCIÓN */}
+      {isDev && (
+        <div className="mb-4 p-3 border-2 border-dashed border-yellow-500 rounded-lg bg-yellow-500/10">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-400">🧪 DEV: Simular conteo de alumnos</span>
+            <Input
+              type="number"
+              min={0}
+              className="w-24 h-8 text-sm"
+              placeholder="Ej: 24"
+              value={devSimCount ?? ''}
+              onChange={e => setDevSimCount(e.target.value === '' ? null : Number(e.target.value))}
+            />
+            <span className="text-xs text-muted-foreground">
+              {devSimCount !== null ? `Simulando ${devSimCount} alumnos` : 'Sin simulación (conteo real)'}
+            </span>
+            {devSimCount !== null && (
+              <Button variant="outline" size="sm" onClick={() => setDevSimCount(null)} className="h-7 text-xs">
+                Desactivar
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
