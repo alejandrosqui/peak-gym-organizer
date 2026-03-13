@@ -13,6 +13,7 @@ import Routines from "./pages/Routines";
 import NutritionPlans from "./pages/NutritionPlans";
 import UserManagement from "./pages/UserManagement";
 import StudentPortal from "./pages/StudentPortal";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -69,6 +70,7 @@ const App = () => (
             <Route path="/routines" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Routines /></ProtectedRoute>} />
             <Route path="/nutrition" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><NutritionPlans /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute allowedRoles={['owner']}><UserManagement /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute allowedRoles={['owner']}><Settings /></ProtectedRoute>} />
             <Route path="/my-portal" element={<ProtectedRoute allowedRoles={['student']}><StudentPortal /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

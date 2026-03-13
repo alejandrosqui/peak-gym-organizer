@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Search, Edit, Trash2, AlertTriangle, UserCheck, UserX, KeyRound } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, AlertTriangle, UserCheck, UserX, KeyRound, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const emptyStudent = {
@@ -40,13 +40,21 @@ const Students: React.FC = () => {
   const [portalEmail, setPortalEmail] = useState('');
   const [portalPassword, setPortalPassword] = useState('');
   const [portalLoading, setPortalLoading] = useState(false);
+  const [paymentLink, setPaymentLink] = useState('');
 
   useEffect(() => { fetchStudents(); }, []);
 
   const fetchStudents = async () => {
-    const { data: studentsData } = await supabase.from('students').select('*').order('full_name');
-    const { data: routineData } = await supabase.from('student_routines').select('student_id, routines(name)');
-    const { data: planData } = await supabase.from('student_nutrition_plans').select('student_id, nutrition_plans(name)');
+    const [studentsRes, routineRes, planRes, settingsRes] = await Promise.all([
+      supabase.from('students').select('*').order('full_name'),
+      supabase.from('student_routines').select('student_id, routines(name)'),
+      supabase.from('student_nutrition_plans').select('student_id, nutrition_plans(name)'),
+      supabase.from('gym_settings').select('value').eq('key', 'payment_link').single(),
+    ]);
+    const studentsData = studentsRes.data;
+    const routineData = routineRes.data;
+    const planData = planRes.data;
+    setPaymentLink(settingsRes.data?.value || '');
 
     const routineMap = new Map((routineData || []).map((r: any) => [r.student_id, r.routines?.name]));
     const planMap = new Map((planData || []).map((p: any) => [p.student_id, p.nutrition_plans?.name]));
@@ -310,6 +318,17 @@ const Students: React.FC = () => {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
+                    {student.phone && (
+                      <Button variant="ghost" size="icon" title="Enviar recordatorio por WhatsApp" className="text-success hover:text-success"
+                        onClick={() => {
+                          const phone = student.phone!.replace(/\D/g, '');
+                          const linkSection = paymentLink ? `\n👉 ${paymentLink}` : '';
+                          const msg = `Hola ${student.full_name}, te recordamos que tu cuota del gimnasio vence el día ${student.due_day} de cada mes.\n\nPodés pagar de estas maneras:\n1️⃣ En recepción del gimnasio\n2️⃣ Por transferencia\n3️⃣ Con el link de pago${linkSection}\n\n¡Gracias!`;
+                          window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+                        }}>
+                        <MessageCircle className="h-4 w-4" />
+                      </Button>
+                    )}
                     {!student.user_id && isStaffOrOwner && (
                       <Button variant="ghost" size="icon" onClick={() => openPortalDialog(student)} title="Crear acceso al portal">
                         <KeyRound className="h-4 w-4" />

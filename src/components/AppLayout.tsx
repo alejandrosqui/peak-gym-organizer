@@ -6,7 +6,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
 import { NavLink } from '@/components/NavLink';
-import { LayoutDashboard, Users, CreditCard, Dumbbell, Apple, Settings, LogOut, Menu, User } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, Dumbbell, Apple, Settings, LogOut, Menu, User, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const ownerNav = [
@@ -31,6 +31,7 @@ const studentNav = [
 
 const adminItems = [
   { title: 'Usuarios', url: '/users', icon: Settings },
+  { title: 'Configuración', url: '/settings', icon: Wrench },
 ];
 
 function AppSidebarContent() {
