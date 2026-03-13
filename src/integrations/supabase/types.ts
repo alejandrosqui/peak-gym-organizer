@@ -130,11 +130,14 @@ export type Database = {
           due_date: string
           gym_id: string | null
           id: string
+          last_reminder_sent_at: string | null
+          last_reminder_type: string | null
           notes: string | null
           payment_date: string | null
           payment_link: string | null
           payment_method: string | null
           payment_reference: string | null
+          reminder_count: number
           status: string
           student_id: string
         }
@@ -144,11 +147,14 @@ export type Database = {
           due_date: string
           gym_id?: string | null
           id?: string
+          last_reminder_sent_at?: string | null
+          last_reminder_type?: string | null
           notes?: string | null
           payment_date?: string | null
           payment_link?: string | null
           payment_method?: string | null
           payment_reference?: string | null
+          reminder_count?: number
           status?: string
           student_id: string
         }
@@ -158,11 +164,14 @@ export type Database = {
           due_date?: string
           gym_id?: string | null
           id?: string
+          last_reminder_sent_at?: string | null
+          last_reminder_type?: string | null
           notes?: string | null
           payment_date?: string | null
           payment_link?: string | null
           payment_method?: string | null
           payment_reference?: string | null
+          reminder_count?: number
           status?: string
           student_id?: string
         }
