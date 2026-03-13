@@ -29,7 +29,8 @@ const UserManagement: React.FC = () => {
   useEffect(() => { if (isOwner) fetchUsers(); }, [isOwner]);
 
   const fetchUsers = async () => {
-    const { data } = await supabase.from('user_roles').select('user_id, role');
+    if (!gymId) { setLoading(false); return; }
+    const { data } = await supabase.from('user_roles').select('user_id, role').eq('gym_id', gymId);
     if (data) setUsers(data.map(d => ({ id: d.user_id, role: d.role as AppRole })));
     setLoading(false);
   };
