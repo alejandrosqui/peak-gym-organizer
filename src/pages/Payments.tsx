@@ -202,6 +202,7 @@ const Payments: React.FC = () => {
               <TableHead>Alumno</TableHead>
               <TableHead>Monto</TableHead>
               <TableHead>Vencimiento</TableHead>
+              <TableHead>Días</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead className="hidden md:table-cell">Método</TableHead>
               <TableHead className="hidden md:table-cell">Último pago</TableHead>
