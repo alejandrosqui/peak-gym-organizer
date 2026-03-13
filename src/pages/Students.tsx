@@ -49,7 +49,7 @@ const Students: React.FC = () => {
       nutrition_plan_name: planMap.get(s.id) || null,
     }));
 
-    setStudents(enriched);
+    setStudents(enriched as Student[]);
     setLoading(false);
   };
 
