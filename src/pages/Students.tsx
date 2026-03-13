@@ -26,7 +26,7 @@ const generatePassword = () => {
 };
 
 const Students: React.FC = () => {
-  const { isOwner, isStaffOrOwner } = useAuth();
+  const { isOwner, isStaffOrOwner, gymId } = useAuth();
   const [students, setStudents] = useState<Student[]>([]);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -95,12 +95,13 @@ const Students: React.FC = () => {
   };
 
   const handleSave = async () => {
-    const payload = {
+    const payload: any = {
       full_name: form.full_name, phone: form.phone || null, email: form.email || null,
       age: form.age ? Number(form.age) : null, weight: form.weight ? Number(form.weight) : null,
       height: form.height ? Number(form.height) : null, training_goal: form.training_goal || null,
       enrollment_date: form.enrollment_date, due_day: Number(form.due_day),
       status: form.status, observations: form.observations || null,
+      ...(editing ? {} : { gym_id: gymId }),
     };
 
     if (editing) {

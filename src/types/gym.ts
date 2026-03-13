@@ -1,5 +1,14 @@
 export type AppRole = 'owner' | 'manager' | 'student' | 'admin' | 'staff';
 
+export interface Gym {
+  id: string;
+  name: string;
+  owner_user_id: string;
+  plan: 'free' | 'pro';
+  max_students: number;
+  created_at: string;
+}
+
 export interface Student {
   id: string;
   full_name: string;
@@ -15,6 +24,7 @@ export interface Student {
   observations: string | null;
   user_id: string | null;
   must_change_password: boolean;
+  gym_id: string | null;
   created_at: string;
   updated_at: string;
   // joined data
@@ -31,6 +41,7 @@ export interface Payment {
   status: 'paid' | 'pending' | 'overdue';
   payment_method: string | null;
   notes: string | null;
+  gym_id: string | null;
   created_at: string;
   // joined
   student_name?: string;
@@ -43,6 +54,7 @@ export interface Routine {
   level: 'beginner' | 'intermediate' | 'advanced';
   days_per_week: number;
   description: string | null;
+  gym_id: string | null;
   created_at: string;
   updated_at: string;
   exercises?: RoutineExercise[];
@@ -69,6 +81,7 @@ export interface NutritionPlan {
   suggested_meals: string | null;
   suggested_supplements: string | null;
   description: string | null;
+  gym_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -77,5 +90,6 @@ export interface UserWithRole {
   id: string;
   email: string;
   role: AppRole;
+  gym_id: string | null;
   created_at: string;
 }

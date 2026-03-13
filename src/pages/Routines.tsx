@@ -16,7 +16,7 @@ const emptyRoutine = { name: '', goal: 'muscle_gain', level: 'beginner', days_pe
 const emptyExercise = { exercise_name: '', sets: '3', reps: '12', rest_seconds: '60', observations: '' };
 
 const Routines: React.FC = () => {
-  const { isOwner } = useAuth();
+  const { isOwner, gymId } = useAuth();
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -54,7 +54,8 @@ const Routines: React.FC = () => {
       const { data } = await supabase.from('routines').insert({
         name: form.name, goal: form.goal, level: form.level,
         days_per_week: Number(form.days_per_week), description: form.description || null,
-      }).select().single();
+        gym_id: gymId,
+      } as any).select().single();
       if (data && exercises.filter(e => e.exercise_name).length > 0) {
         await supabase.from('routine_exercises').insert(
           exercises.filter(e => e.exercise_name).map((e, i) => ({

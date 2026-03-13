@@ -16,22 +16,60 @@ export type Database = {
     Tables: {
       gym_settings: {
         Row: {
+          gym_id: string | null
           id: string
           key: string
           updated_at: string
           value: string
         }
         Insert: {
+          gym_id?: string | null
           id?: string
           key: string
           updated_at?: string
           value?: string
         }
         Update: {
+          gym_id?: string | null
           id?: string
           key?: string
           updated_at?: string
           value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_settings_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gyms: {
+        Row: {
+          created_at: string
+          id: string
+          max_students: number
+          name: string
+          owner_user_id: string
+          plan: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          max_students?: number
+          name: string
+          owner_user_id: string
+          plan?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          max_students?: number
+          name?: string
+          owner_user_id?: string
+          plan?: string
         }
         Relationships: []
       }
@@ -42,6 +80,7 @@ export type Database = {
           description: string | null
           estimated_calories: number | null
           goal: string
+          gym_id: string | null
           id: string
           name: string
           suggested_meals: string | null
@@ -54,6 +93,7 @@ export type Database = {
           description?: string | null
           estimated_calories?: number | null
           goal: string
+          gym_id?: string | null
           id?: string
           name: string
           suggested_meals?: string | null
@@ -66,19 +106,29 @@ export type Database = {
           description?: string | null
           estimated_calories?: number | null
           goal?: string
+          gym_id?: string | null
           id?: string
           name?: string
           suggested_meals?: string | null
           suggested_supplements?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "nutrition_plans_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payments: {
         Row: {
           amount: number
           created_at: string
           due_date: string
+          gym_id: string | null
           id: string
           notes: string | null
           payment_date: string | null
@@ -92,6 +142,7 @@ export type Database = {
           amount: number
           created_at?: string
           due_date: string
+          gym_id?: string | null
           id?: string
           notes?: string | null
           payment_date?: string | null
@@ -105,6 +156,7 @@ export type Database = {
           amount?: number
           created_at?: string
           due_date?: string
+          gym_id?: string | null
           id?: string
           notes?: string | null
           payment_date?: string | null
@@ -115,6 +167,13 @@ export type Database = {
           student_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "payments_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payments_student_id_fkey"
             columns: ["student_id"]
@@ -174,6 +233,7 @@ export type Database = {
           days_per_week: number
           description: string | null
           goal: string
+          gym_id: string | null
           id: string
           level: string
           name: string
@@ -184,6 +244,7 @@ export type Database = {
           days_per_week?: number
           description?: string | null
           goal: string
+          gym_id?: string | null
           id?: string
           level: string
           name: string
@@ -194,12 +255,21 @@ export type Database = {
           days_per_week?: number
           description?: string | null
           goal?: string
+          gym_id?: string | null
           id?: string
           level?: string
           name?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "routines_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       student_nutrition_plans: {
         Row: {
@@ -281,6 +351,7 @@ export type Database = {
           email: string | null
           enrollment_date: string
           full_name: string
+          gym_id: string | null
           height: number | null
           id: string
           must_change_password: boolean
@@ -299,6 +370,7 @@ export type Database = {
           email?: string | null
           enrollment_date?: string
           full_name: string
+          gym_id?: string | null
           height?: number | null
           id?: string
           must_change_password?: boolean
@@ -317,6 +389,7 @@ export type Database = {
           email?: string | null
           enrollment_date?: string
           full_name?: string
+          gym_id?: string | null
           height?: number | null
           id?: string
           must_change_password?: boolean
@@ -328,31 +401,51 @@ export type Database = {
           user_id?: string | null
           weight?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "students_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
+          gym_id: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
+          gym_id?: string | null
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
+          gym_id?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_gym_id_for_user: { Args: { _user_id: string }; Returns: string }
       get_student_id_for_user: { Args: { _user_id: string }; Returns: string }
       get_user_role: {
         Args: { _user_id: string }

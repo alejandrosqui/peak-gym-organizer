@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 interface StudentBasic { id: string; full_name: string; phone: string | null; due_day: number; }
 
 const Payments: React.FC = () => {
-  const { isOwner } = useAuth();
+  const { isOwner, gymId } = useAuth();
   const [payments, setPayments] = useState<(Payment & { student_phone?: string | null })[]>([]);
   const [students, setStudents] = useState<StudentBasic[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +47,8 @@ const Payments: React.FC = () => {
     await supabase.from('payments').insert({
       student_id: form.student_id, amount: Number(form.amount),
       due_date: form.due_date, status: 'pending', payment_method: form.payment_method,
-    });
+      gym_id: gymId,
+    } as any);
     toast.success('Pago registrado');
     setDialogOpen(false); setForm({ student_id: '', amount: '', due_date: '', payment_method: 'cash' }); fetchData();
   };

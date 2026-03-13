@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 const emptyPlan = { name: '', goal: 'muscle_gain', estimated_calories: '', daily_protein: '', suggested_meals: '', suggested_supplements: '', description: '' };
 
 const NutritionPlans: React.FC = () => {
-  const { isOwner } = useAuth();
+  const { isOwner, gymId } = useAuth();
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -31,14 +31,14 @@ const NutritionPlans: React.FC = () => {
   };
 
   const handleSave = async () => {
-    const payload = {
+    const payload: any = {
       name: form.name, goal: form.goal,
       estimated_calories: form.estimated_calories ? Number(form.estimated_calories) : null,
       daily_protein: form.daily_protein || null, suggested_meals: form.suggested_meals || null,
       suggested_supplements: form.suggested_supplements || null, description: form.description || null,
     };
     if (editing) { await supabase.from('nutrition_plans').update(payload).eq('id', editing.id); toast.success('Plan actualizado'); }
-    else { await supabase.from('nutrition_plans').insert(payload); toast.success('Plan creado'); }
+    else { await supabase.from('nutrition_plans').insert({ ...payload, gym_id: gymId }); toast.success('Plan creado'); }
     resetForm(); fetchPlans();
   };
 
