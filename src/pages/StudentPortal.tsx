@@ -4,16 +4,26 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { User, CreditCard, Dumbbell, Apple, Calendar, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { User, CreditCard, Dumbbell, Apple, Calendar, AlertTriangle, Lock } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Student, Payment, Routine, NutritionPlan } from '@/types/gym';
 
 const StudentPortal: React.FC = () => {
-  const { studentId } = useAuth();
+  const { studentId, user } = useAuth();
   const [student, setStudent] = useState<Student | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [routine, setRoutine] = useState<Routine | null>(null);
   const [nutritionPlan, setNutritionPlan] = useState<NutritionPlan | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Password change state
+  const [mustChangePassword, setMustChangePassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
     if (studentId) fetchData();
@@ -28,9 +38,14 @@ const StudentPortal: React.FC = () => {
       supabase.from('student_nutrition_plans').select('nutrition_plan_id, nutrition_plans(*)').eq('student_id', studentId!).maybeSingle(),
     ]);
 
-    setStudent(studentRes.data as Student | null);
+    const studentData = studentRes.data as any;
+    setStudent(studentData as Student | null);
     setPayments((paymentsRes.data || []) as Payment[]);
-    
+
+    if (studentData?.must_change_password) {
+      setMustChangePassword(true);
+    }
+
     if (routineRes.data) {
       const r = (routineRes.data as any).routines;
       if (r) setRoutine({ ...r, exercises: r.routine_exercises || [] });
@@ -41,14 +56,70 @@ const StudentPortal: React.FC = () => {
     setLoading(false);
   };
 
+  const handleChangePassword = async () => {
+    if (newPassword.length < 6) { toast.error('La contraseña debe tener al menos 6 caracteres'); return; }
+    if (newPassword !== confirmPassword) { toast.error('Las contraseñas no coinciden'); return; }
+
+    setChangingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+
+      // Clear the flag
+      await supabase.from('students').update({ must_change_password: false } as any).eq('id', studentId!);
+      setMustChangePassword(false);
+      toast.success('Contraseña actualizada correctamente');
+    } catch (err: any) {
+      toast.error(err.message || 'Error al cambiar contraseña');
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64 text-muted-foreground">Cargando...</div>;
-  
+
   if (!studentId || !student) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
         <AlertTriangle className="h-12 w-12 mb-4 opacity-50" />
         <p className="text-lg">Tu cuenta no está vinculada a un perfil de alumno.</p>
         <p className="text-sm">Contactá al gimnasio para que vincule tu cuenta.</p>
+      </div>
+    );
+  }
+
+  // Force password change screen
+  if (mustChangePassword) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+              <Lock className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle className="text-xl">Cambiá tu contraseña</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Por seguridad, necesitás crear una nueva contraseña antes de continuar.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Nueva contraseña</Label>
+              <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Mínimo 6 caracteres" />
+            </div>
+            <div>
+              <Label>Confirmar contraseña</Label>
+              <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Repetir contraseña" />
+            </div>
+            <Button
+              onClick={handleChangePassword}
+              className="w-full"
+              disabled={changingPassword || !newPassword || !confirmPassword}
+            >
+              {changingPassword ? 'Actualizando...' : 'Guardar nueva contraseña'}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -71,7 +142,6 @@ const StudentPortal: React.FC = () => {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-foreground">Mi Panel</h1>
 
-      {/* Profile + Status */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center gap-3 pb-2">
@@ -108,7 +178,6 @@ const StudentPortal: React.FC = () => {
         </Card>
       </div>
 
-      {/* Routine */}
       <Card>
         <CardHeader className="flex flex-row items-center gap-3">
           <Dumbbell className="h-5 w-5 text-primary" />
@@ -139,7 +208,6 @@ const StudentPortal: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Nutrition Plan */}
       <Card>
         <CardHeader className="flex flex-row items-center gap-3">
           <Apple className="h-5 w-5 text-primary" />
@@ -168,7 +236,6 @@ const StudentPortal: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Payment History */}
       <Card>
         <CardHeader className="flex flex-row items-center gap-3">
           <CreditCard className="h-5 w-5 text-primary" />

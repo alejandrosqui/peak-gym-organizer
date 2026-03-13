@@ -283,6 +283,7 @@ export type Database = {
           full_name: string
           height: number | null
           id: string
+          must_change_password: boolean
           observations: string | null
           phone: string | null
           status: string
@@ -300,6 +301,7 @@ export type Database = {
           full_name: string
           height?: number | null
           id?: string
+          must_change_password?: boolean
           observations?: string | null
           phone?: string | null
           status?: string
@@ -317,6 +319,7 @@ export type Database = {
           full_name?: string
           height?: number | null
           id?: string
+          must_change_password?: boolean
           observations?: string | null
           phone?: string | null
           status?: string

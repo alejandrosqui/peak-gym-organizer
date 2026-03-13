@@ -14,6 +14,7 @@ export interface Student {
   status: 'active' | 'inactive' | 'overdue';
   observations: string | null;
   user_id: string | null;
+  must_change_password: boolean;
   created_at: string;
   updated_at: string;
   // joined data
