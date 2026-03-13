@@ -15,6 +15,7 @@ import NutritionPlans from "./pages/NutritionPlans";
 import UserManagement from "./pages/UserManagement";
 import StudentPortal from "./pages/StudentPortal";
 import Settings from "./pages/Settings";
+import Upgrade from "./pages/Upgrade";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,6 +66,7 @@ const AppRoutes: React.FC = () => (
     <Route path="/nutrition" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><NutritionPlans /></ProtectedRoute>} />
     <Route path="/users" element={<ProtectedRoute allowedRoles={['owner']}><UserManagement /></ProtectedRoute>} />
     <Route path="/settings" element={<ProtectedRoute allowedRoles={['owner']}><Settings /></ProtectedRoute>} />
+    <Route path="/upgrade" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Upgrade /></ProtectedRoute>} />
     <Route path="/my-portal" element={<ProtectedRoute allowedRoles={['student']}><StudentPortal /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>

@@ -121,7 +121,13 @@ const Students: React.FC = () => {
         const gym = gymRes.data as any;
         const currentCount = devSimCount !== null ? devSimCount : (countRes.count || 0);
         if (gym && gym.max_students !== -1 && currentCount >= gym.max_students) {
-          toast.error(`Has alcanzado el límite de ${gym.max_students} alumnos del plan Free. Actualiza a Pro para seguir agregando alumnos.`);
+          toast.error(`Has alcanzado el límite de ${gym.max_students} alumnos del plan Free.`, {
+            duration: 8000,
+            action: {
+              label: 'Actualizar a Pro',
+              onClick: () => window.location.href = '/upgrade',
+            },
+          });
           return;
         }
       }
