@@ -7,13 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Search, Edit, Trash2, AlertTriangle, UserCheck, UserX, KeyRound, MessageCircle, RefreshCw } from 'lucide-react';
+import { Search, Edit, Trash2, AlertTriangle, UserCheck, UserX, KeyRound, MessageCircle, RefreshCw, Dumbbell } from 'lucide-react';
 import { toast } from 'sonner';
 import { getStudentRowClass } from '@/lib/dateUtils';
 import StudentFormDialog from '@/components/students/StudentFormDialog';
 import PortalAccessDialog from '@/components/students/PortalAccessDialog';
 import ResetPasswordDialog from '@/components/students/ResetPasswordDialog';
 import CredentialsModal, { type StudentCredentials } from '@/components/students/CredentialsModal';
+import AssignmentsDialog from '@/components/students/AssignmentsDialog';
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -57,6 +58,9 @@ const Students: React.FC = () => {
 
   const [credentials, setCredentials] = useState<StudentCredentials | null>(null);
   const [credentialsModalOpen, setCredentialsModalOpen] = useState(false);
+
+  const [assignTarget, setAssignTarget] = useState<Student | null>(null);
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
 
   useEffect(() => { if (gymId) fetchStudents(); }, [gymId]);
 
@@ -208,6 +212,15 @@ const Students: React.FC = () => {
                         <RefreshCw className="h-4 w-4" />
                       </Button>
                     )}
+                    {isStaffOrOwner && (
+                      <Button
+                        variant="ghost" size="icon"
+                        title="Asignar rutina / plan alimentario"
+                        onClick={() => { setAssignTarget(student); setAssignDialogOpen(true); }}
+                      >
+                        <Dumbbell className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button variant="ghost" size="icon" onClick={() => setEditing(student)}>
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -247,6 +260,14 @@ const Students: React.FC = () => {
         open={credentialsModalOpen}
         onOpenChange={(open) => { setCredentialsModalOpen(open); if (!open) setCredentials(null); }}
         credentials={credentials}
+      />
+
+      <AssignmentsDialog
+        open={assignDialogOpen}
+        onOpenChange={(open) => { setAssignDialogOpen(open); if (!open) setAssignTarget(null); }}
+        student={assignTarget}
+        gymId={gymId}
+        onSaved={fetchStudents}
       />
     </div>
   );
