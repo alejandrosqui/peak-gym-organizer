@@ -23,10 +23,10 @@ const NutritionPlans: React.FC = () => {
   const [editing, setEditing] = useState<NutritionPlan | null>(null);
   const [form, setForm] = useState(emptyPlan);
 
-  useEffect(() => { fetchPlans(); }, []);
+  useEffect(() => { if (gymId) fetchPlans(); }, [gymId]);
 
   const fetchPlans = async () => {
-    const { data } = await supabase.from('nutrition_plans').select('*').order('name');
+    const { data } = await supabase.from('nutrition_plans').select('*').eq('gym_id', gymId).order('name');
     setPlans(data || []); setLoading(false);
   };
 

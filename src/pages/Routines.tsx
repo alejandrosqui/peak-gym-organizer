@@ -25,10 +25,10 @@ const Routines: React.FC = () => {
   const [exercises, setExercises] = useState<typeof emptyExercise[]>([{ ...emptyExercise }]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  useEffect(() => { fetchRoutines(); }, []);
+  useEffect(() => { if (gymId) fetchRoutines(); }, [gymId]);
 
   const fetchRoutines = async () => {
-    const { data } = await supabase.from('routines').select('*, routine_exercises(*)').order('name');
+    const { data } = await supabase.from('routines').select('*, routine_exercises(*)').eq('gym_id', gymId).order('name');
     setRoutines((data || []).map((r: any) => ({ ...r, exercises: r.routine_exercises || [] })));
     setLoading(false);
   };

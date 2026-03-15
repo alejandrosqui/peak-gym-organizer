@@ -57,7 +57,9 @@ const StudentPortal: React.FC = () => {
   };
 
   const handleChangePassword = async () => {
-    if (newPassword.length < 6) { toast.error('La contraseña debe tener al menos 6 caracteres'); return; }
+    if (newPassword.length < 8) { toast.error('La contraseña debe tener al menos 8 caracteres'); return; }
+    if (!/[A-Z]/.test(newPassword)) { toast.error('La contraseña debe tener al menos una letra mayúscula'); return; }
+    if (!/[0-9]/.test(newPassword)) { toast.error('La contraseña debe tener al menos un número'); return; }
     if (newPassword !== confirmPassword) { toast.error('Las contraseñas no coinciden'); return; }
 
     setChangingPassword(true);
@@ -65,8 +67,10 @@ const StudentPortal: React.FC = () => {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
 
-      // Clear the flag
-      await supabase.from('students').update({ must_change_password: false } as any).eq('id', studentId!);
+      // Clear the flag — if this fails the user would be stuck in the change-password loop
+      const { error: dbError } = await supabase.from('students').update({ must_change_password: false } as any).eq('id', studentId!);
+      if (dbError) throw dbError;
+
       setMustChangePassword(false);
       toast.success('Contraseña actualizada correctamente');
     } catch (err: any) {
@@ -105,7 +109,8 @@ const StudentPortal: React.FC = () => {
           <CardContent className="space-y-4">
             <div>
               <Label>Nueva contraseña</Label>
-              <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Mínimo 6 caracteres" />
+              <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Mínimo 8 caracteres" />
+              <p className="text-xs text-muted-foreground mt-1">Mínimo 8 caracteres, una mayúscula y un número.</p>
             </div>
             <div>
               <Label>Confirmar contraseña</Label>

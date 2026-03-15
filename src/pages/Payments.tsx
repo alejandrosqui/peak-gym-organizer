@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, CheckCircle, DollarSign, AlertTriangle, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { getDaysDiff, getPaymentRowClass } from '@/lib/dateUtils';
 
 interface StudentBasic { id: string; full_name: string; phone: string | null; due_day: number; }
 
@@ -25,13 +26,13 @@ const Payments: React.FC = () => {
   const [paymentLink, setPaymentLink] = useState('');
   const [form, setForm] = useState({ student_id: '', amount: '', due_date: '', payment_method: 'cash' });
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { if (gymId) fetchData(); }, [gymId]);
 
   const fetchData = async () => {
     const [paymentsRes, studentsRes, settingsRes] = await Promise.all([
-      supabase.from('payments').select('*, students(full_name, phone)').order('due_date', { ascending: false }),
-      supabase.from('students').select('id, full_name, phone, due_day').eq('status', 'active').order('full_name'),
-      supabase.from('gym_settings').select('value').eq('key', 'payment_link').single(),
+      supabase.from('payments').select('*, students(full_name, phone)').eq('gym_id', gymId).order('due_date', { ascending: false }),
+      supabase.from('students').select('id, full_name, phone, due_day').eq('gym_id', gymId).eq('status', 'active').order('full_name'),
+      supabase.from('gym_settings').select('value').eq('key', 'payment_link').eq('gym_id', gymId).single(),
     ]);
     setPayments((paymentsRes.data || []).map((p: any) => ({
       ...p,
@@ -68,16 +69,7 @@ const Payments: React.FC = () => {
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
-  const getRowClass = (payment: Payment) => {
-    if (payment.status === 'paid') return '';
-    if (payment.status === 'overdue') return 'row-danger';
-    // Check if due in 3 days or less
-    const dueDate = new Date(payment.due_date + 'T00:00:00');
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const diffDays = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    if (diffDays <= 3 && diffDays >= 0) return 'row-warning';
-    return 'table-row-striped';
-  };
+  const getRowClass = (payment: Payment) => getPaymentRowClass(payment.status, payment.due_date);
 
   const totalPaid = payments.filter(p => p.status === 'paid').reduce((s, p) => s + Number(p.amount), 0);
   const totalPending = payments.filter(p => p.status !== 'paid').reduce((s, p) => s + Number(p.amount), 0);
@@ -91,12 +83,6 @@ const Payments: React.FC = () => {
     };
     const { cls, label, emoji } = map[status] || map.pending;
     return <Badge variant="outline" className={cls}>{emoji} {label}</Badge>;
-  };
-
-  const getDaysDiff = (dueDate: string) => {
-    const due = new Date(dueDate + 'T00:00:00');
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    return Math.ceil((today.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
   };
 
   const statusOrder: Record<string, number> = { overdue: 0, pending: 1, paid: 2 };

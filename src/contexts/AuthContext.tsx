@@ -59,17 +59,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let initialSessionHandled = false;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        // If getSession() already handled the initial load, skip the INITIAL_SESSION event
+        // to avoid a duplicate fetchRole call (race condition between the two handlers).
+        if (event === 'INITIAL_SESSION' && initialSessionHandled) {
+          setLoading(false);
+          return;
+        }
+
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          // Avoid duplicate fetch when both getSession and onAuthStateChange fire
-          if (!initialSessionHandled) {
-            initialSessionHandled = true;
-            setTimeout(() => fetchRole(session.user.id), 0);
-          } else {
-            setTimeout(() => fetchRole(session.user.id), 0);
-          }
+          initialSessionHandled = true;
+          fetchRole(session.user.id);
         } else {
           setRole(null);
           setStudentId(null);

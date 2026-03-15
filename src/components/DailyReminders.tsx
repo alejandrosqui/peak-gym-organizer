@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { getDaysDiff } from '@/lib/dateUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -22,11 +24,12 @@ interface ReminderPayment {
 }
 
 const DailyReminders: React.FC = () => {
+  const { gymId } = useAuth();
   const [reminders, setReminders] = useState<ReminderPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState<string | null>(null);
 
-  useEffect(() => { fetchReminders(); }, []);
+  useEffect(() => { if (gymId) fetchReminders(); }, [gymId]);
 
   const fetchReminders = async () => {
     const todayStr = new Date().toISOString().split('T')[0];
@@ -37,21 +40,18 @@ const DailyReminders: React.FC = () => {
     const { data, error } = await supabase
       .from('payments')
       .select('id, student_id, amount, due_date, status, last_reminder_sent_at, reminder_count, students(full_name, phone)')
+      .eq('gym_id', gymId)
       .in('status', ['pending', 'overdue'])
       .lte('due_date', futureStr)
       .order('due_date', { ascending: true });
 
     if (error) { setLoading(false); return; }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayStart = today.toISOString().split('T')[0];
+    const todayStart = new Date().toISOString().split('T')[0];
 
     const items: ReminderPayment[] = (data || [])
       .map((p: any) => {
-        const dueDate = new Date(p.due_date + 'T00:00:00');
-        const diffMs = today.getTime() - dueDate.getTime();
-        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        const diffDays = getDaysDiff(p.due_date);
         const type: 'due_soon' | 'overdue' = diffDays > 0 ? 'overdue' : 'due_soon';
 
         return {
@@ -100,6 +100,7 @@ const DailyReminders: React.FC = () => {
       .from('gym_settings')
       .select('value')
       .eq('key', 'payment_link')
+      .eq('gym_id', gymId)
       .single();
 
     const paymentLink = settings?.value || '';

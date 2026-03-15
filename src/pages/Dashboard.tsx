@@ -16,14 +16,14 @@ interface DashboardStats {
 }
 
 const Dashboard: React.FC = () => {
-  const { isOwner, isManager, gymName } = useAuth();
+  const { isOwner, isManager, gymName, gymId } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     activeStudents: 0, overdueStudents: 0, paymentsThisMonth: 0,
     revenueThisMonth: 0, dueSoonStudents: 0, noRoutineStudents: 0,
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetchStats(); }, []);
+  useEffect(() => { if (gymId) fetchStats(); }, [gymId]);
 
   const fetchStats = async () => {
     const now = new Date();
@@ -32,8 +32,8 @@ const Dashboard: React.FC = () => {
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
     const [studentsRes, paymentsRes, routineAssignRes] = await Promise.all([
-      supabase.from('students').select('id, status, due_day'),
-      supabase.from('payments').select('id, amount, status, payment_date').gte('due_date', monthStart).lte('due_date', monthEnd),
+      supabase.from('students').select('id, status, due_day').eq('gym_id', gymId),
+      supabase.from('payments').select('id, amount, status, payment_date').eq('gym_id', gymId).gte('due_date', monthStart).lte('due_date', monthEnd),
       supabase.from('student_routines').select('student_id'),
     ]);
 
