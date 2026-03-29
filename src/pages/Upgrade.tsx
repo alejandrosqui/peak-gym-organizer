@@ -4,8 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Crown, Users, MessageCircle, BarChart3, Shield, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Check, Crown, Users, MessageCircle, BarChart3, Shield, ArrowLeft, Loader2 } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const features = [
@@ -18,30 +18,65 @@ const features = [
 const Upgrade: React.FC = () => {
   const { gymId } = useAuth();
   const navigate = useNavigate();
-  const [paymentLink, setPaymentLink] = useState('');
+  const [searchParams] = useSearchParams();
   const [currentPlan, setCurrentPlan] = useState('free');
   const [loading, setLoading] = useState(true);
+  const [subscribing, setSubscribing] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!gymId) return;
-      const [gymRes, settingsRes] = await Promise.all([
-        supabase.from('gyms').select('plan').eq('id', gymId).single(),
-        supabase.from('gym_settings').select('value').eq('key', 'payment_link').single(),
-      ]);
+      const gymRes = await supabase.from('gyms').select('plan').eq('id', gymId).single();
       setCurrentPlan((gymRes.data as any)?.plan || 'free');
-      setPaymentLink(settingsRes.data?.value || '');
       setLoading(false);
     };
     fetchData();
   }, [gymId]);
 
-  const handleSubscribe = () => {
-    if (paymentLink) {
-      window.open(paymentLink, '_blank');
-    } else {
-      toast.info('Configurá tu link de pago en Ajustes para activar suscripciones.');
-      navigate('/settings');
+  // Handle MercadoPago back_urls redirect
+  useEffect(() => {
+    const status = searchParams.get('status');
+    if (status === 'success') {
+      toast.success('¡Pago recibido! Tu plan Pro se activará en instantes.');
+      setCurrentPlan('pro');
+    } else if (status === 'failure') {
+      toast.error('El pago no se pudo procesar. Podés intentarlo nuevamente.');
+    } else if (status === 'pending') {
+      toast.info('Tu pago está pendiente de acreditación.');
+    }
+  }, [searchParams]);
+
+  const handleSubscribe = async () => {
+    if (subscribing) return;
+    setSubscribing(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Sesión expirada. Por favor, volvé a iniciar sesión.');
+        return;
+      }
+
+      const supabaseUrl = (supabase as any).supabaseUrl as string;
+      const res = await fetch(`${supabaseUrl}/functions/v1/create-checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+          apikey: (supabase as any).supabaseKey as string,
+        },
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json.init_point) {
+        toast.error(json.error || 'No se pudo iniciar el pago. Intentá de nuevo.');
+        return;
+      }
+
+      window.location.href = json.init_point;
+    } catch {
+      toast.error('Error de conexión. Intentá de nuevo.');
+    } finally {
+      setSubscribing(false);
     }
   };
 
@@ -105,8 +140,8 @@ const Upgrade: React.FC = () => {
           <CardHeader className="text-center pb-4">
             <CardTitle className="text-xl text-foreground">Pro</CardTitle>
             <div className="mt-2">
-              <span className="text-4xl font-extrabold text-foreground">$19</span>
-              <span className="text-muted-foreground ml-1">USD / mes</span>
+              <span className="text-4xl font-extrabold text-foreground">$21.000</span>
+              <span className="text-muted-foreground ml-1">ARS / mes</span>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -121,8 +156,11 @@ const Upgrade: React.FC = () => {
             </ul>
 
             {currentPlan === 'free' ? (
-              <Button onClick={handleSubscribe} className="w-full" size="lg">
-                <Crown className="h-4 w-4 mr-2" /> Suscribirse
+              <Button onClick={handleSubscribe} className="w-full" size="lg" disabled={subscribing}>
+                {subscribing
+                  ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Redirigiendo...</>
+                  : <><Crown className="h-4 w-4 mr-2" /> Suscribirse</>
+                }
               </Button>
             ) : (
               <Button disabled className="w-full" size="lg" variant="outline">
