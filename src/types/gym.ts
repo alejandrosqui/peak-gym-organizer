@@ -93,3 +93,65 @@ export interface UserWithRole {
   gym_id: string | null;
   created_at: string;
 }
+
+export interface GymSpace {
+  id: string;
+  gym_id: string;
+  name: string;
+  description: string | null;
+  capacity: number;
+  created_at: string;
+}
+
+export interface ClassSchedule {
+  id: string;
+  gym_id: string;
+  space_id: string | null;
+  name: string;
+  days: number[];   // 0=Dom 1=Lun 2=Mar 3=Mié 4=Jue 5=Vie 6=Sáb
+  start_time: string;
+  end_time: string;
+  max_capacity: number;
+  instructor_name: string | null;
+  color: string;
+  is_active: boolean;
+  created_at: string;
+  // joined
+  space_name?: string | null;
+}
+
+export interface StudentClassSubscription {
+  id: string;
+  student_id: string;
+  schedule_id: string;
+  gym_id: string;
+  weekly_limit: number;
+  is_active: boolean;
+  created_at: string;
+  // joined
+  student_name?: string;
+  schedule_name?: string;
+}
+
+export type EnrollmentStatus =
+  | 'confirmed'
+  | 'cancelled_early'
+  | 'cancelled_late'
+  | 'waitlist'
+  | 'attended'
+  | 'absent'
+  | 'extended';
+
+export interface ClassEnrollment {
+  id: string;
+  student_id: string;
+  schedule_id: string;
+  gym_id: string;
+  date: string;
+  status: EnrollmentStatus;
+  enrolled_at: string;
+  cancelled_at: string | null;
+  // joined
+  student_name?: string;
+  schedule_name?: string;
+}

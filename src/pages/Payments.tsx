@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, CheckCircle, DollarSign, AlertTriangle, MessageCircle } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { getDaysDiff, getPaymentRowClass } from '@/lib/dateUtils';
 
@@ -21,10 +22,12 @@ const Payments: React.FC = () => {
   const [payments, setPayments] = useState<(Payment & { student_phone?: string | null })[]>([]);
   const [students, setStudents] = useState<StudentBasic[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [payingId, setPayingId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [paymentLink, setPaymentLink] = useState('');
-  const [form, setForm] = useState({ student_id: '', amount: '', due_date: '', payment_method: 'cash' });
+  const [form, setForm] = useState({ student_id: '', amount: '', due_date: '', payment_method: 'cash', already_paid: true });
 
   useEffect(() => { if (gymId) fetchData(); }, [gymId]);
 
@@ -45,18 +48,31 @@ const Payments: React.FC = () => {
   };
 
   const handleCreatePayment = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    const today = new Date().toISOString().split('T')[0];
     await supabase.from('payments').insert({
       student_id: form.student_id, amount: Number(form.amount),
-      due_date: form.due_date, status: 'pending', payment_method: form.payment_method,
+      due_date: form.due_date,
+      status: form.already_paid ? 'paid' : 'pending',
+      payment_date: form.already_paid ? today : null,
+      payment_method: form.payment_method,
       gym_id: gymId,
     } as any);
     toast.success('Pago registrado');
-    setDialogOpen(false); setForm({ student_id: '', amount: '', due_date: '', payment_method: 'cash' }); fetchData();
+    setDialogOpen(false);
+    setForm({ student_id: '', amount: '', due_date: '', payment_method: 'cash', already_paid: true });
+    setSubmitting(false);
+    fetchData();
   };
 
   const handleMarkPaid = async (payment: Payment) => {
+    if (payingId === payment.id) return;
+    setPayingId(payment.id);
     await supabase.from('payments').update({ status: 'paid', payment_date: new Date().toISOString().split('T')[0] }).eq('id', payment.id);
-    toast.success('Marcado como pagado'); fetchData();
+    toast.success('Marcado como pagado');
+    setPayingId(null);
+    fetchData();
   };
 
   const sendWhatsAppReminder = (payment: Payment & { student_phone?: string | null }) => {
@@ -101,7 +117,7 @@ const Payments: React.FC = () => {
     <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-foreground">Cuotas y Pagos</h1>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <Dialog open={dialogOpen} onOpenChange={open => { setDialogOpen(open); if (!open) setForm({ student_id: '', amount: '', due_date: '', payment_method: 'cash', already_paid: true }); }}>
           <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" />Registrar Pago</Button></DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Nuevo Pago</DialogTitle></DialogHeader>
@@ -128,8 +144,17 @@ const Payments: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="flex items-center justify-between rounded-lg border p-3 bg-muted/30">
+                <div>
+                  <Label className="text-sm font-medium">Ya cobrado</Label>
+                  <p className="text-xs text-muted-foreground">{form.already_paid ? 'Se registra como Pagado hoy' : 'Se registra como Pendiente'}</p>
+                </div>
+                <Switch checked={form.already_paid} onCheckedChange={v => setForm({ ...form, already_paid: v })} />
+              </div>
             </div>
-            <Button onClick={handleCreatePayment} className="w-full mt-4" disabled={!form.student_id || !form.amount || !form.due_date}>Registrar Pago</Button>
+            <Button onClick={handleCreatePayment} className="w-full mt-4" disabled={!form.student_id || !form.amount || !form.due_date || submitting}>
+              {submitting ? 'Registrando...' : 'Registrar Pago'}
+            </Button>
           </DialogContent>
         </Dialog>
       </div>
@@ -226,8 +251,8 @@ const Payments: React.FC = () => {
                         <Button variant="ghost" size="icon" onClick={() => sendWhatsAppReminder(payment)} title="Enviar recordatorio por WhatsApp" className="text-success hover:text-success">
                           <MessageCircle className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleMarkPaid(payment)} className="text-success hover:text-success">
-                          <CheckCircle className="h-4 w-4 mr-1" /> Pagar
+                        <Button variant="ghost" size="sm" onClick={() => handleMarkPaid(payment)} className="text-success hover:text-success" disabled={payingId === payment.id}>
+                          <CheckCircle className="h-4 w-4 mr-1" /> {payingId === payment.id ? '...' : 'Pagar'}
                         </Button>
                       </>
                     )}

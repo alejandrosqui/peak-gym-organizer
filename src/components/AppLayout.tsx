@@ -6,13 +6,14 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
 import { NavLink } from '@/components/NavLink';
-import { LayoutDashboard, Users, CreditCard, Dumbbell, Apple, Settings, LogOut, Menu, User, Wrench } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, Dumbbell, Apple, Settings, LogOut, Menu, User, Wrench, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const ownerNav = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
   { title: 'Alumnos', url: '/students', icon: Users },
   { title: 'Cuotas y Pagos', url: '/payments', icon: CreditCard },
+  { title: 'Clases', url: '/classes', icon: CalendarDays },
   { title: 'Rutinas', url: '/routines', icon: Dumbbell },
   { title: 'Alimentación', url: '/nutrition', icon: Apple },
 ];
@@ -21,6 +22,7 @@ const managerNav = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
   { title: 'Alumnos', url: '/students', icon: Users },
   { title: 'Cuotas y Pagos', url: '/payments', icon: CreditCard },
+  { title: 'Clases', url: '/classes', icon: CalendarDays },
   { title: 'Rutinas', url: '/routines', icon: Dumbbell },
   { title: 'Alimentación', url: '/nutrition', icon: Apple },
 ];

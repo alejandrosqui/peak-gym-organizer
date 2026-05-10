@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { User, CreditCard, Dumbbell, Apple, Calendar, AlertTriangle, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Student, Payment, Routine, NutritionPlan } from '@/types/gym';
+import MyClasses from '@/components/MyClasses';
 
 const StudentPortal: React.FC = () => {
   const { studentId, user } = useAuth();
@@ -182,6 +183,17 @@ const StudentPortal: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Mis Clases */}
+      <Card>
+        <CardHeader className="flex flex-row items-center gap-3">
+          <Calendar className="h-5 w-5 text-primary" />
+          <CardTitle>Mis Clases</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <MyClasses />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center gap-3">
