@@ -29,7 +29,7 @@ const Login: React.FC = () => {
           <div className="mx-auto w-16 h-16 gym-gradient rounded-2xl flex items-center justify-center mb-4">
             <Dumbbell className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">GymManager</h1>
+          <h1 className="text-2xl font-bold text-foreground">GymHub</h1>
           <p className="text-muted-foreground text-sm">Sistema de gestión para gimnasios</p>
         </CardHeader>
         <CardContent>
