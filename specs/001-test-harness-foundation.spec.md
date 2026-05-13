@@ -221,6 +221,7 @@ Al cerrar esta spec, debe cumplirse:
 
 ## Notas
 
+- **Pre-flight**: antes de correr tests contra edge functions, verificar que apuntan al proyecto Supabase correcto (`argrapuaijxjzldvpulw`). Hubo un caso de `.env` desactualizado apuntando a otro project ID.
 - Esta spec es el **gate** para todo refactor posterior. Hasta que esté ✅, no se ataca paginación ni RLS hardening.
 - El patrón establecido aquí se replica en TecnoSolution, CoopKaiser, PatagoniaSoftware en specs posteriores.
 - Después de cerrar esto, la siguiente spec es **002-rls-audit-and-hardening**.
