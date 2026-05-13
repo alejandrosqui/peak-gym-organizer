@@ -12,6 +12,19 @@ dist
 dist-ssr
 *.local
 
+# Environment
+.env
+.env.*
+!.env.example
+
+# Supabase CLI binaries / temp
+supabase.exe
+supabase_windows_amd64/
+supabase/.temp/
+
+# Claude Code per-machine settings
+.claude/settings.local.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
