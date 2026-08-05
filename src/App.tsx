@@ -18,6 +18,8 @@ import Settings from "./pages/Settings";
 import Upgrade from "./pages/Upgrade";
 import Classes from "./pages/Classes";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
+import SuperAdmin from "./pages/SuperAdmin";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: strin
     const normalizedRole = isOwner ? 'owner' : isManager ? 'manager' : isStudent ? 'student' : role;
     if (!allowedRoles.includes(normalizedRole)) {
       if (isStudent) return <Navigate to="/my-portal" replace />;
+  if (role === 'admin') return <Navigate to="/superadmin" replace />;
       return <Navigate to="/dashboard" replace />;
     }
   }
@@ -38,10 +41,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: strin
 };
 
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading, isStudent } = useAuth();
+  const { user, loading, isStudent, role } = useAuth();
   if (loading) return <div className="flex items-center justify-center min-h-screen text-muted-foreground">Cargando...</div>;
   if (user) {
     if (isStudent) return <Navigate to="/my-portal" replace />;
+  if (role === 'admin') return <Navigate to="/superadmin" replace />;
     return <Navigate to="/dashboard" replace />;
   }
   return <>{children}</>;
@@ -52,6 +56,7 @@ const DefaultRedirect: React.FC = () => {
   if (loading) return <div className="flex items-center justify-center min-h-screen text-muted-foreground">Cargando...</div>;
   if (!user) return <Navigate to="/login" replace />;
   if (isStudent) return <Navigate to="/my-portal" replace />;
+  if (role === 'admin') return <Navigate to="/superadmin" replace />;
   return <Navigate to="/dashboard" replace />;
 };
 
@@ -59,7 +64,8 @@ const AppRoutes: React.FC = () => (
   <Routes>
     <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
     <Route path="/register" element={<PublicRoute><RegisterGym /></PublicRoute>} />
-    <Route path="/" element={<DefaultRedirect />} />
+    <Route path="/" element={<Index />} />
+    <Route path="/app" element={<DefaultRedirect />} />
     <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Dashboard /></ProtectedRoute>} />
     <Route path="/students" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Students /></ProtectedRoute>} />
     <Route path="/payments" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Payments /></ProtectedRoute>} />
@@ -69,6 +75,7 @@ const AppRoutes: React.FC = () => (
     <Route path="/settings" element={<ProtectedRoute allowedRoles={['owner']}><Settings /></ProtectedRoute>} />
     <Route path="/upgrade" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Upgrade /></ProtectedRoute>} />
     <Route path="/classes" element={<ProtectedRoute allowedRoles={['owner', 'manager']}><Classes /></ProtectedRoute>} />
+    <Route path="/superadmin" element={<ProtectedRoute allowedRoles={['owner']}><SuperAdmin /></ProtectedRoute>} />
     <Route path="/my-portal" element={<ProtectedRoute allowedRoles={['student']}><StudentPortal /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>
