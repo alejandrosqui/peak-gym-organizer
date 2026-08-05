@@ -16,7 +16,7 @@ import { generatePassword } from '@/lib/passwordUtils';
 const emptyForm = {
   full_name: '', phone: '', email: '', age: '', weight: '', height: '',
   training_goal: '', enrollment_date: new Date().toISOString().split('T')[0],
-  due_day: '1', status: 'active', observations: '',
+  due_day: '1', status: 'active', observations: '', dni: '', rfid_uid: '',
 };
 
 interface StudentFormDialogProps {
@@ -35,6 +35,7 @@ const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
   const [portalEmail, setPortalEmail] = useState('');
   const [portalPassword, setPortalPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [firstPayment, setFirstPayment] = useState(true);
 
   useEffect(() => {
     if (editing) {
@@ -50,6 +51,8 @@ const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
         due_day: editing.due_day.toString(),
         status: editing.status,
         observations: editing.observations || '',
+        dni: editing.dni || '',
+        rfid_uid: editing.rfid_uid || '',
       });
       setOpen(true);
     }
@@ -60,10 +63,11 @@ const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
     setCreatePortal(false);
     setPortalEmail('');
     setPortalPassword('');
+    setFirstPayment(true);
   };
 
   const handleSave = async () => {
-    if (!form.full_name) return;
+    if (!form.full_name || !form.dni) return;
     setLoading(true);
 
     const payload: any = {
@@ -78,6 +82,8 @@ const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
       due_day: Number(form.due_day),
       status: form.status,
       observations: form.observations || null,
+      dni: form.dni.replace(/\D/g, '') || null,
+      rfid_uid: form.rfid_uid.trim() || null,
     };
 
     try {
@@ -99,18 +105,35 @@ const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
               action: { label: 'Actualizar a Pro', onClick: () => window.location.href = '/upgrade' },
             });
           } else {
-            toast.error('Error al crear alumno');
+            toast.error('Error: ' + (error.message || 'desconocido'));
           }
           return;
         }
 
         toast.success('Alumno creado');
 
+        if (firstPayment && newStudent) {
+          const dueDate = new Date();
+          dueDate.setMonth(dueDate.getMonth() + 1);
+          await supabase.from('payments').insert({
+            student_id: newStudent.id,
+            gym_id: gymId,
+            amount: 0,
+            status: 'paid',
+            payment_date: new Date().toISOString().split('T')[0],
+            due_date: dueDate.toISOString().split('T')[0],
+          });
+        }
+
         if (createPortal && portalEmail && portalPassword && newStudent) {
           const { data, error: portalError } = await supabase.functions.invoke('create-student-portal', {
             body: { student_id: newStudent.id, email: portalEmail, password: portalPassword },
           });
-          if (portalError) throw new Error(portalError.message);
+          if (portalError) {
+            let msg = portalError.message;
+            try { const body = await (portalError as any).context?.json(); if (body?.error) msg = body.error; } catch {}
+            throw new Error(msg);
+          }
           if (data?.error) throw new Error(data.error);
 
           onPortalCreated({
@@ -146,6 +169,23 @@ const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
             <Label>Nombre completo *</Label>
             <Input value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} />
           </div>
+          <div className="col-span-2">
+            <Label>DNI *</Label>
+            <Input
+              value={form.dni}
+              onChange={e => setForm({ ...form, dni: e.target.value })}
+              placeholder="Ej: 38123456"
+              maxLength={10}
+            />
+          </div>
+          <div className="col-span-2">
+            <Label>RFID UID <span className="text-muted-foreground text-xs">(opcional — tarjeta/llavero)</span></Label>
+            <Input
+              value={form.rfid_uid}
+              onChange={e => setForm({ ...form, rfid_uid: e.target.value })}
+              placeholder="Ej: A1B2C3D4"
+            />
+          </div>
           <div><Label>Teléfono</Label><Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></div>
           <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></div>
           <div><Label>Edad</Label><Input type="number" value={form.age} onChange={e => setForm({ ...form, age: e.target.value })} /></div>
@@ -175,6 +215,16 @@ const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
 
           {!editing && (
             <div className="col-span-2 border-t border-border pt-3 mt-1">
+              <div className="flex items-center gap-2 mb-2">
+                <Checkbox
+                  id="first-payment"
+                  checked={firstPayment}
+                  onCheckedChange={(v) => setFirstPayment(!!v)}
+                />
+                <Label htmlFor="first-payment" className="cursor-pointer font-medium text-green-700 dark:text-green-400">
+                  Registrar primer cuota como pagada (vence en 30 dias)
+                </Label>
+              </div>
               <div className="flex items-center gap-2 mb-3">
                 <Checkbox
                   id="create-portal"
@@ -210,7 +260,7 @@ const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
             </div>
           )}
         </div>
-        <Button onClick={handleSave} className="w-full mt-4" disabled={!form.full_name || loading}>
+        <Button onClick={handleSave} className="w-full mt-4" disabled={!form.full_name || !form.dni || loading}>
           {editing ? 'Guardar Cambios' : createPortal ? 'Crear Alumno + Portal' : 'Crear Alumno'}
         </Button>
       </DialogContent>

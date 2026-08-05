@@ -25,6 +25,8 @@ export interface Student {
   user_id: string | null;
   must_change_password: boolean;
   gym_id: string | null;
+  dni: string | null;
+  rfid_uid: string | null;
   created_at: string;
   updated_at: string;
   // joined data

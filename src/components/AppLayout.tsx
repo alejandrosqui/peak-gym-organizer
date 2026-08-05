@@ -6,7 +6,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
 import { NavLink } from '@/components/NavLink';
-import { LayoutDashboard, Users, CreditCard, Dumbbell, Apple, Settings, LogOut, Menu, User, Wrench, CalendarDays } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, Dumbbell, Apple, Settings, LogOut, Menu, User, Wrench, CalendarDays, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const ownerNav = [
@@ -102,6 +102,25 @@ function AppSidebarContent() {
           </SidebarGroup>
         )}
 
+        {role === 'admin' && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-sidebar-muted text-xs uppercase tracking-wider">
+              {!collapsed && 'Superadmin'}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/superadmin" end className="text-sidebar-foreground hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>Panel Global</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
         <div className="mt-auto p-4 border-t border-sidebar-border">
           {!collapsed && (
             <div className="mb-3">
