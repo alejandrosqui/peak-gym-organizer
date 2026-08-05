@@ -52,7 +52,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 const DefaultRedirect: React.FC = () => {
-  const { user, loading, isStudent } = useAuth();
+  const { user, loading, isStudent, role } = useAuth();
   if (loading) return <div className="flex items-center justify-center min-h-screen text-muted-foreground">Cargando...</div>;
   if (!user) return <Navigate to="/login" replace />;
   if (isStudent) return <Navigate to="/my-portal" replace />;
