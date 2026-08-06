@@ -130,7 +130,7 @@ const DailyReminders: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Summary card */}
-      <Card className="border shadow-sm">
+      <Card className="surface-panel border-border/80 bg-card/90">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">Recordatorios pendientes de hoy</CardTitle>
           <Bell className="h-5 w-5 text-warning" />
@@ -148,9 +148,9 @@ const DailyReminders: React.FC = () => {
       </Card>
 
       {/* Reminders table */}
-      <Card className="border shadow-sm">
+      <Card className="surface-panel border-border/80 bg-card/90">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
             <Bell className="h-5 w-5" />
             Recordatorios de hoy
           </CardTitle>
@@ -167,7 +167,7 @@ const DailyReminders: React.FC = () => {
             <div className="overflow-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-muted/50">
+                  <TableRow className="bg-muted/35 hover:bg-muted/35">
                     <TableHead>Alumno</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead>Monto</TableHead>
@@ -206,7 +206,7 @@ const DailyReminders: React.FC = () => {
                           size="sm"
                           onClick={() => handleSendReminder(r)}
                           disabled={sending === r.id}
-                          className="text-success hover:text-success"
+                          className="rounded-lg text-primary hover:bg-primary/10 hover:text-primary"
                         >
                           <MessageCircle className="h-4 w-4 mr-1" />
                           WhatsApp
