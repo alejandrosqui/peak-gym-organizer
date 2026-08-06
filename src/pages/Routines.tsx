@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Dumbbell, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Edit, Trash2, Dumbbell, ChevronDown, ChevronUp, Layers, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 
 const emptyRoutine = { name: '', goal: 'muscle_gain', level: 'beginner', days_per_week: '3', description: '' };
@@ -95,11 +95,10 @@ const Routines: React.FC = () => {
   const levelLabels: Record<string, string> = { beginner: 'Principiante', intermediate: 'Intermedio', advanced: 'Avanzado' };
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Biblioteca de Rutinas</h1>
+    <div className="space-y-7">
+      <section className="relative overflow-hidden rounded-[28px] border border-violet-400/20 bg-gradient-to-br from-violet-500/12 via-card to-card p-6 lg:p-8"><div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-violet-500/10 blur-3xl"/><div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div><div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-violet-300"><Dumbbell className="h-3.5 w-3.5"/> Entrenamiento</div><h1 className="text-3xl font-black tracking-tight text-foreground lg:text-4xl">Biblioteca de rutinas</h1><p className="mt-2 text-sm text-muted-foreground lg:text-base">Diseñá programas que se entienden de un vistazo.</p></div>
         <Dialog open={dialogOpen} onOpenChange={o => { if (!o) resetForm(); else setDialogOpen(true); }}>
-          <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" />Nueva Rutina</Button></DialogTrigger>
+          <DialogTrigger asChild><Button className="h-11 rounded-xl bg-violet-400 px-5 font-bold text-slate-950 hover:bg-violet-300"><Plus className="mr-2 h-4 w-4" />Nueva rutina</Button></DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editing ? 'Editar Rutina' : 'Nueva Rutina'}</DialogTitle></DialogHeader>
             <div className="space-y-4 mt-4">
@@ -154,7 +153,7 @@ const Routines: React.FC = () => {
             <Button onClick={handleSave} className="w-full mt-4" disabled={!form.name}>{editing ? 'Guardar Cambios' : 'Crear Rutina'}</Button>
           </DialogContent>
         </Dialog>
-      </div>
+        </div></section>
 
       {loading ? (
         <div className="text-center py-8 text-muted-foreground">Cargando...</div>
@@ -163,8 +162,8 @@ const Routines: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {routines.map(routine => (
-            <Card key={routine.id} className="border shadow-sm">
-              <CardHeader className="pb-2">
+            <Card key={routine.id} className="group overflow-hidden rounded-3xl border-border/70 bg-card/80 shadow-xl shadow-black/10 transition-all duration-300 hover:-translate-y-1 hover:border-violet-400/30">
+              <div className="h-1.5 bg-gradient-to-r from-violet-400 via-fuchsia-400 to-emerald-400" /><CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="text-lg">{routine.name}</CardTitle>
@@ -180,7 +179,7 @@ const Routines: React.FC = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-2">{routine.days_per_week} días/semana</p>
+                <div className="mb-3 grid grid-cols-2 gap-2"><div className="rounded-xl border border-border/60 bg-muted/20 p-3"><span className="text-xs uppercase tracking-wider text-muted-foreground">Frecuencia</span><div className="mt-1 flex items-center gap-2 font-black"><Layers className="h-4 w-4 text-violet-300" />{routine.days_per_week} días</div></div><div className="rounded-xl border border-border/60 bg-muted/20 p-3"><span className="text-xs uppercase tracking-wider text-muted-foreground">Ejercicios</span><div className="mt-1 flex items-center gap-2 font-black"><Zap className="h-4 w-4 text-emerald-300" />{routine.exercises?.length || 0}</div></div></div>
                 {routine.description && <p className="text-sm text-muted-foreground mb-3">{routine.description}</p>}
                 <Button variant="ghost" size="sm" onClick={() => setExpandedId(expandedId === routine.id ? null : routine.id)} className="w-full justify-between">
                   <span>{routine.exercises?.length || 0} ejercicios</span>
