@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Save, Link, Building2 } from 'lucide-react';
+import { Save, Link, Building2, Sparkles, CreditCard, ShieldCheck, Gauge } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Settings: React.FC = () => {
@@ -54,11 +54,12 @@ const Settings: React.FC = () => {
   if (loading) return <div className="text-center py-8 text-muted-foreground">Cargando...</div>;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-foreground mb-6">Configuración</h1>
+    <div className="space-y-7">
+      <section className="relative overflow-hidden rounded-[28px] border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-card to-card p-6 lg:p-8"><div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl"/><div className="relative"><div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-emerald-300"><Sparkles className="h-3.5 w-3.5"/> Personalización</div><h1 className="text-3xl font-black tracking-tight lg:text-4xl">Configuración del gimnasio</h1><p className="mt-2 max-w-2xl text-sm text-muted-foreground lg:text-base">Tu marca, tus cobros y los datos principales del negocio en un solo lugar.</p></div></section>
 
-      <div className="space-y-6 max-w-xl">
-        <Card>
+      <div className="grid gap-6 lg:grid-cols-[1.2fr_.8fr]">
+        <div className="space-y-6">
+        <Card className="rounded-3xl border-border/70 bg-card/80 shadow-xl shadow-black/10">
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><Building2 className="h-5 w-5" /> Datos del Gimnasio</CardTitle>
             <CardDescription>Configuración general de tu gimnasio.</CardDescription>
@@ -80,7 +81,7 @@ const Settings: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-3xl border-border/70 bg-card/80 shadow-xl shadow-black/10">
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><Link className="h-5 w-5" /> Link de Pago</CardTitle>
             <CardDescription>Este link se incluirá automáticamente en los recordatorios de WhatsApp.</CardDescription>
@@ -98,9 +99,23 @@ const Settings: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Button onClick={handleSave} disabled={saving} className="w-full">
-          <Save className="h-4 w-4 mr-2" /> {saving ? 'Guardando...' : 'Guardar Configuración'}
-        </Button>
+        </div>
+        <aside className="space-y-4">
+          <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/[0.06] p-6">
+            <Gauge className="h-6 w-6 text-emerald-300" />
+            <p className="mt-5 text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Plan actual</p>
+            <div className="mt-2 text-3xl font-black uppercase">{plan}</div>
+            <p className="mt-2 text-sm text-muted-foreground">Capacidad para {maxStudents === -1 ? 'alumnos ilimitados' : `${maxStudents} alumnos`}.</p>
+          </div>
+          <div className="rounded-3xl border border-border/70 bg-card/70 p-6">
+            <ShieldCheck className="h-6 w-6 text-cyan-300" />
+            <h3 className="mt-4 font-bold">Configuración segura</h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Los cambios se guardan únicamente para este gimnasio y respetan el aislamiento multi-tenant.</p>
+          </div>
+          <Button onClick={handleSave} disabled={saving} className="h-12 w-full rounded-xl bg-emerald-500 font-bold text-slate-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-400">
+            <Save className="mr-2 h-4 w-4" /> {saving ? 'Guardando...' : 'Guardar configuración'}
+          </Button>
+        </aside>
       </div>
     </div>
   );

@@ -12,11 +12,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Users, Clock, MapPin, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users, Clock, MapPin, CheckCircle, XCircle, CalendarDays, Sparkles, Activity } from 'lucide-react';
 
 const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 const DAY_FULL = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-const COLORS = ['#f97316', '#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#eab308', '#ec4899'];
+const COLORS = ['#10b981', '#22d3ee', '#8b5cf6', '#f59e0b', '#ef4444', '#84cc16', '#ec4899'];
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
   confirmed:      { label: 'Confirmado',  cls: 'bg-blue-100 text-blue-700' },
@@ -284,14 +284,14 @@ const Classes: React.FC = () => {
   const enrolledStudentIds = new Set(scheduleEnrollments.map(e => e.student_id));
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-foreground mb-6">Clases y Horarios</h1>
+    <div className="space-y-7">
+      <section className="relative overflow-hidden rounded-[28px] border border-sky-400/20 bg-gradient-to-br from-sky-500/10 via-card to-card p-6 lg:p-8"><div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-sky-400/10 blur-3xl"/><div className="relative flex items-end justify-between gap-4"><div><div className="mb-3 inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-sky-300"><CalendarDays className="h-3.5 w-3.5"/> Agenda inteligente</div><h1 className="text-3xl font-black tracking-tight lg:text-4xl">Clases y horarios</h1><p className="mt-2 text-sm text-muted-foreground lg:text-base">Organizá espacios, cupos y asistencia desde una agenda visual.</p></div><Activity className="hidden h-14 w-14 text-sky-300/30 md:block"/></div></section>
 
       <Tabs defaultValue="schedules">
-        <TabsList className="mb-6">
-          <TabsTrigger value="schedules">Clases</TabsTrigger>
-          <TabsTrigger value="spaces">Espacios</TabsTrigger>
-          <TabsTrigger value="attendance">Asistencia del día</TabsTrigger>
+        <TabsList className="h-auto rounded-2xl border border-border/70 bg-card/70 p-1.5">
+          <TabsTrigger value="schedules" className="rounded-xl px-5 py-2.5 data-[state=active]:bg-sky-400 data-[state=active]:text-slate-950">Clases</TabsTrigger>
+          <TabsTrigger value="spaces" className="rounded-xl px-5 py-2.5 data-[state=active]:bg-sky-400 data-[state=active]:text-slate-950">Espacios</TabsTrigger>
+          <TabsTrigger value="attendance" className="rounded-xl px-5 py-2.5 data-[state=active]:bg-sky-400 data-[state=active]:text-slate-950">Asistencia del día</TabsTrigger>
         </TabsList>
 
         {/* ── TAB: Clases ───────────────────────────────────────────────── */}
@@ -376,7 +376,7 @@ const Classes: React.FC = () => {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {spaces.map(sp => (
-                <Card key={sp.id}>
+                <Card key={sp.id} className="rounded-3xl border-border/70 bg-card/80 shadow-xl shadow-black/10 transition-all hover:-translate-y-1 hover:border-sky-400/30">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base">{sp.name}</CardTitle>
@@ -433,7 +433,7 @@ const Classes: React.FC = () => {
               {scheduleEnrollments.length === 0 ? (
                 <p className="text-muted-foreground text-center py-8">No hay confirmaciones para esta clase en esta fecha.</p>
               ) : (
-                <div className="border rounded-lg overflow-hidden bg-card">
+                <div className="overflow-hidden rounded-2xl border border-border/70 bg-card/80 shadow-xl shadow-black/10">
                   <table className="w-full text-sm">
                     <thead className="bg-muted/50">
                       <tr>

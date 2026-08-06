@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, KeyRound } from 'lucide-react';
+import { CreditCard, Dumbbell, Fingerprint, KeyRound, Plus, UserRound } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Student } from '@/types/gym';
 import type { StudentCredentials } from './CredentialsModal';
@@ -158,111 +158,158 @@ const StudentFormDialog: React.FC<StudentFormDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { setOpen(isOpen); if (!isOpen) resetForm(); }}>
       <DialogTrigger asChild>
-        <Button onClick={() => setOpen(true)}><Plus className="mr-2 h-4 w-4" />Nuevo Alumno</Button>
+        <Button onClick={() => setOpen(true)} className="h-11 rounded-xl bg-emerald-500 px-5 font-semibold text-slate-950 hover:bg-emerald-400">
+          <Plus className="mr-2 h-4 w-4" /> Nuevo alumno
+        </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{editing ? 'Editar Alumno' : 'Nuevo Alumno'}</DialogTitle>
+      <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto border-border/80 bg-card p-0">
+        <DialogHeader className="border-b border-border/70 px-6 py-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
+              <UserRound className="h-5 w-5" />
+            </div>
+            <div>
+              <DialogTitle className="text-xl">{editing ? 'Editar alumno' : 'Registrar nuevo alumno'}</DialogTitle>
+              <p className="mt-1 text-sm text-muted-foreground">Datos personales, membresía, RFID y acceso al portal.</p>
+            </div>
+          </div>
         </DialogHeader>
-        <div className="grid grid-cols-2 gap-3 mt-4">
-          <div className="col-span-2">
-            <Label>Nombre completo *</Label>
-            <Input value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} />
-          </div>
-          <div className="col-span-2">
-            <Label>DNI *</Label>
-            <Input
-              value={form.dni}
-              onChange={e => setForm({ ...form, dni: e.target.value })}
-              placeholder="Ej: 38123456"
-              maxLength={10}
-            />
-          </div>
-          <div className="col-span-2">
-            <Label>RFID UID <span className="text-muted-foreground text-xs">(opcional — tarjeta/llavero)</span></Label>
-            <Input
-              value={form.rfid_uid}
-              onChange={e => setForm({ ...form, rfid_uid: e.target.value })}
-              placeholder="Ej: A1B2C3D4"
-            />
-          </div>
-          <div><Label>Teléfono</Label><Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></div>
-          <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></div>
-          <div><Label>Edad</Label><Input type="number" value={form.age} onChange={e => setForm({ ...form, age: e.target.value })} /></div>
-          <div><Label>Peso (kg)</Label><Input type="number" value={form.weight} onChange={e => setForm({ ...form, weight: e.target.value })} /></div>
-          <div><Label>Altura (cm)</Label><Input type="number" value={form.height} onChange={e => setForm({ ...form, height: e.target.value })} /></div>
-          <div><Label>Día vencimiento cuota</Label><Input type="number" min="1" max="31" value={form.due_day} onChange={e => setForm({ ...form, due_day: e.target.value })} /></div>
-          <div className="col-span-2">
-            <Label>Objetivo de entrenamiento</Label>
-            <Input value={form.training_goal} onChange={e => setForm({ ...form, training_goal: e.target.value })} />
-          </div>
-          <div><Label>Fecha de inscripción</Label><Input type="date" value={form.enrollment_date} onChange={e => setForm({ ...form, enrollment_date: e.target.value })} /></div>
-          <div>
-            <Label>Estado</Label>
-            <Select value={form.status} onValueChange={v => setForm({ ...form, status: v as any })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Activo</SelectItem>
-                <SelectItem value="inactive">Inactivo</SelectItem>
-                <SelectItem value="overdue">Moroso</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="col-span-2">
-            <Label>Observaciones</Label>
-            <Textarea value={form.observations} onChange={e => setForm({ ...form, observations: e.target.value })} />
-          </div>
+
+        <div className="space-y-6 px-6 py-5">
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <UserRound className="h-4 w-4 text-emerald-400" /> Datos personales
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <Label>Nombre completo *</Label>
+                <Input className="mt-1.5 h-11 rounded-xl" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} />
+              </div>
+              <div>
+                <Label>DNI *</Label>
+                <Input className="mt-1.5 h-11 rounded-xl" value={form.dni} onChange={e => setForm({ ...form, dni: e.target.value })} placeholder="Ej: 38123456" maxLength={10} />
+              </div>
+              <div>
+                <Label>Teléfono</Label>
+                <Input className="mt-1.5 h-11 rounded-xl" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input className="mt-1.5 h-11 rounded-xl" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+              </div>
+              <div>
+                <Label>Edad</Label>
+                <Input className="mt-1.5 h-11 rounded-xl" type="number" value={form.age} onChange={e => setForm({ ...form, age: e.target.value })} />
+              </div>
+              <div>
+                <Label>Peso (kg)</Label>
+                <Input className="mt-1.5 h-11 rounded-xl" type="number" value={form.weight} onChange={e => setForm({ ...form, weight: e.target.value })} />
+              </div>
+              <div>
+                <Label>Altura (cm)</Label>
+                <Input className="mt-1.5 h-11 rounded-xl" type="number" value={form.height} onChange={e => setForm({ ...form, height: e.target.value })} />
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-4 border-t border-border/70 pt-5">
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Dumbbell className="h-4 w-4 text-emerald-400" /> Membresía y entrenamiento
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <Label>Objetivo de entrenamiento</Label>
+                <Input className="mt-1.5 h-11 rounded-xl" value={form.training_goal} onChange={e => setForm({ ...form, training_goal: e.target.value })} placeholder="Ej: hipertrofia, descenso de peso, rehabilitación..." />
+              </div>
+              <div>
+                <Label>Fecha de inscripción</Label>
+                <Input className="mt-1.5 h-11 rounded-xl" type="date" value={form.enrollment_date} onChange={e => setForm({ ...form, enrollment_date: e.target.value })} />
+              </div>
+              <div>
+                <Label>Día de vencimiento</Label>
+                <Input className="mt-1.5 h-11 rounded-xl" type="number" min="1" max="31" value={form.due_day} onChange={e => setForm({ ...form, due_day: e.target.value })} />
+              </div>
+              <div>
+                <Label>Estado</Label>
+                <Select value={form.status} onValueChange={v => setForm({ ...form, status: v as any })}>
+                  <SelectTrigger className="mt-1.5 h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Activo</SelectItem>
+                    <SelectItem value="inactive">Inactivo</SelectItem>
+                    <SelectItem value="overdue">Moroso</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>RFID UID</Label>
+                <div className="relative mt-1.5">
+                  <Fingerprint className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input className="h-11 rounded-xl pl-10" value={form.rfid_uid} onChange={e => setForm({ ...form, rfid_uid: e.target.value })} placeholder="A1B2C3D4" />
+                </div>
+              </div>
+              <div className="sm:col-span-2">
+                <Label>Observaciones</Label>
+                <Textarea className="mt-1.5 min-h-24 rounded-xl" value={form.observations} onChange={e => setForm({ ...form, observations: e.target.value })} />
+              </div>
+            </div>
+          </section>
 
           {!editing && (
-            <div className="col-span-2 border-t border-border pt-3 mt-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Checkbox
-                  id="first-payment"
-                  checked={firstPayment}
-                  onCheckedChange={(v) => setFirstPayment(!!v)}
-                />
-                <Label htmlFor="first-payment" className="cursor-pointer font-medium text-green-700 dark:text-green-400">
-                  Registrar primer cuota como pagada (vence en 30 dias)
-                </Label>
+            <section className="space-y-4 border-t border-border/70 pt-5">
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <CreditCard className="h-4 w-4 text-emerald-400" /> Alta inicial
               </div>
-              <div className="flex items-center gap-2 mb-3">
-                <Checkbox
-                  id="create-portal"
-                  checked={createPortal}
-                  onCheckedChange={(v) => {
-                    setCreatePortal(!!v);
-                    if (v) { setPortalEmail(form.email || ''); setPortalPassword(generatePassword()); }
-                  }}
-                />
-                <Label htmlFor="create-portal" className="cursor-pointer font-medium">
-                  <KeyRound className="h-4 w-4 inline mr-1" />
-                  Crear acceso al portal del alumno
-                </Label>
+              <div className="grid gap-3">
+                <label htmlFor="first-payment" className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border/70 bg-background/40 p-4 transition-colors hover:border-emerald-500/30">
+                  <Checkbox id="first-payment" checked={firstPayment} onCheckedChange={(value) => setFirstPayment(!!value)} className="mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Registrar primera cuota como pagada</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Se crea el primer pago y el próximo vencimiento queda a 30 días.</p>
+                  </div>
+                </label>
+
+                <label htmlFor="create-portal" className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border/70 bg-background/40 p-4 transition-colors hover:border-emerald-500/30">
+                  <Checkbox id="create-portal" checked={createPortal} onCheckedChange={(value) => {
+                    setCreatePortal(!!value);
+                    if (value) { setPortalEmail(form.email || ''); setPortalPassword(generatePassword()); }
+                  }} className="mt-0.5" />
+                  <div>
+                    <p className="flex items-center gap-2 text-sm font-medium text-foreground"><KeyRound className="h-4 w-4 text-emerald-400" /> Crear acceso al portal</p>
+                    <p className="mt-1 text-xs text-muted-foreground">El alumno podrá consultar rutinas, alimentación y estado de membresía.</p>
+                  </div>
+                </label>
               </div>
+
               {createPortal && (
-                <div className="grid grid-cols-2 gap-3 p-3 rounded-md bg-muted/50 border border-border">
+                <div className="grid gap-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-4 sm:grid-cols-2">
                   <div>
                     <Label>Email de acceso *</Label>
-                    <Input type="email" value={portalEmail} onChange={e => setPortalEmail(e.target.value)} placeholder="alumno@email.com" />
+                    <Input className="mt-1.5 h-11 rounded-xl" type="email" value={portalEmail} onChange={e => setPortalEmail(e.target.value)} placeholder="alumno@email.com" />
                   </div>
                   <div>
                     <Label>Contraseña temporal</Label>
-                    <div className="flex gap-1">
-                      <Input value={portalPassword} onChange={e => setPortalPassword(e.target.value)} />
-                      <Button type="button" variant="outline" size="icon" onClick={() => setPortalPassword(generatePassword())} title="Generar nueva">🎲</Button>
+                    <div className="mt-1.5 flex gap-2">
+                      <Input className="h-11 rounded-xl" value={portalPassword} onChange={e => setPortalPassword(e.target.value)} />
+                      <Button type="button" variant="outline" className="h-11 rounded-xl px-3" onClick={() => setPortalPassword(generatePassword())} title="Generar nueva">🎲</Button>
                     </div>
                   </div>
-                  <p className="col-span-2 text-xs text-muted-foreground">
-                    El alumno deberá cambiar su contraseña en el primer inicio de sesión.
-                  </p>
+                  <p className="text-xs text-muted-foreground sm:col-span-2">El alumno deberá cambiar su contraseña en el primer inicio de sesión.</p>
                 </div>
               )}
-            </div>
+            </section>
           )}
         </div>
-        <Button onClick={handleSave} className="w-full mt-4" disabled={!form.full_name || !form.dni || loading}>
-          {editing ? 'Guardar Cambios' : createPortal ? 'Crear Alumno + Portal' : 'Crear Alumno'}
-        </Button>
+
+        <div className="flex items-center justify-end gap-3 border-t border-border/70 bg-background/30 px-6 py-4">
+          <Button variant="ghost" className="rounded-xl" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button
+            onClick={handleSave}
+            disabled={loading || !form.full_name || !form.dni}
+            className="rounded-xl bg-emerald-500 px-5 font-semibold text-slate-950 hover:bg-emerald-400"
+          >
+            {loading ? 'Guardando...' : editing ? 'Guardar cambios' : 'Registrar alumno'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

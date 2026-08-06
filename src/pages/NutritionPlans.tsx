@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Apple } from 'lucide-react';
+import { Plus, Edit, Trash2, Apple, Flame, Beef, Sparkles, Leaf } from 'lucide-react';
 import { toast } from 'sonner';
 
 const emptyPlan = { name: '', goal: 'muscle_gain', estimated_calories: '', daily_protein: '', suggested_meals: '', suggested_supplements: '', description: '' };
@@ -62,14 +62,15 @@ const NutritionPlans: React.FC = () => {
   const goalLabels: Record<string, string> = { muscle_gain: 'Masa Muscular', fat_loss: 'Pérdida de Grasa', maintenance: 'Mantenimiento' };
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+    <div className="space-y-7">
+      <section className="relative overflow-hidden rounded-[28px] border border-emerald-500/20 bg-gradient-to-br from-lime-500/10 via-card to-card p-6 lg:p-8">
+        <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-lime-400/10 blur-3xl" />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Planes de Alimentación</h1>
-          <p className="text-sm text-muted-foreground mt-1">Orientativo — no reemplaza la consulta con un nutricionista</p>
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-lime-400/20 bg-lime-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-lime-300"><Leaf className="h-3.5 w-3.5" /> Nutrición</div><h1 className="text-3xl font-black tracking-tight text-foreground lg:text-4xl">Planes de alimentación</h1><p className="mt-2 text-sm text-muted-foreground lg:text-base">Biblioteca nutricional clara, visual y lista para asignar.</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={o => { if (!o) resetForm(); else setDialogOpen(true); }}>
-          <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" />Nuevo Plan</Button></DialogTrigger>
+          <DialogTrigger asChild><Button className="h-11 rounded-xl bg-lime-400 px-5 font-bold text-slate-950 hover:bg-lime-300"><Plus className="mr-2 h-4 w-4" />Nuevo plan</Button></DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editing ? 'Editar Plan' : 'Nuevo Plan'}</DialogTitle></DialogHeader>
             <div className="space-y-3 mt-4">
@@ -96,7 +97,8 @@ const NutritionPlans: React.FC = () => {
             <Button onClick={handleSave} className="w-full mt-4" disabled={!form.name}>{editing ? 'Guardar Cambios' : 'Crear Plan'}</Button>
           </DialogContent>
         </Dialog>
-      </div>
+        </div>
+      </section>
 
       {loading ? (
         <div className="text-center py-8 text-muted-foreground">Cargando...</div>
@@ -105,8 +107,8 @@ const NutritionPlans: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {plans.map(plan => (
-            <Card key={plan.id} className="border shadow-sm">
-              <CardHeader className="pb-2">
+            <Card key={plan.id} className="group relative overflow-hidden rounded-3xl border-border/70 bg-card/80 shadow-xl shadow-black/10 transition-all duration-300 hover:-translate-y-1 hover:border-lime-400/30">
+              <div className="h-1.5 bg-gradient-to-r from-lime-400 via-emerald-400 to-cyan-400" /><CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                   <div><CardTitle className="text-lg">{plan.name}</CardTitle><Badge variant="outline" className="mt-1 text-xs">{goalLabels[plan.goal] || plan.goal}</Badge></div>
                   <div className="flex gap-1">
@@ -115,9 +117,9 @@ const NutritionPlans: React.FC = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2">
-                {plan.estimated_calories && <div className="flex justify-between text-sm"><span className="text-muted-foreground">Calorías</span><span className="font-medium">{plan.estimated_calories} kcal</span></div>}
-                {plan.daily_protein && <div className="flex justify-between text-sm"><span className="text-muted-foreground">Proteína</span><span className="font-medium">{plan.daily_protein}</span></div>}
+              <CardContent className="space-y-4">
+                {plan.estimated_calories && <div className="rounded-2xl border border-orange-400/15 bg-orange-400/[0.06] p-3"><div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-orange-300"><Flame className="h-4 w-4" /> Energía diaria</div><div className="mt-1 text-2xl font-black">{plan.estimated_calories}<span className="ml-1 text-sm font-medium text-muted-foreground">kcal</span></div></div>}
+                {plan.daily_protein && <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 px-3 py-2 text-sm"><span className="flex items-center gap-2 text-muted-foreground"><Beef className="h-4 w-4 text-rose-300" /> Proteína</span><span className="font-bold">{plan.daily_protein}</span></div>}
                 {plan.suggested_meals && <div className="text-sm mt-2"><p className="text-muted-foreground font-medium mb-1">Comidas:</p><p className="text-foreground whitespace-pre-line text-xs">{plan.suggested_meals}</p></div>}
                 {plan.suggested_supplements && <div className="text-sm"><span className="text-muted-foreground">Suplementos: </span><span>{plan.suggested_supplements}</span></div>}
               </CardContent>

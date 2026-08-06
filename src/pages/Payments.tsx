@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, CheckCircle, DollarSign, AlertTriangle, MessageCircle } from 'lucide-react';
+import { Plus, CheckCircle, DollarSign, AlertTriangle, MessageCircle, WalletCards, ArrowUpRight, ReceiptText } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { getDaysDiff, getPaymentRowClass } from '@/lib/dateUtils';
@@ -114,11 +114,17 @@ const Payments: React.FC = () => {
     });
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Cuotas y Pagos</h1>
+    <div className="space-y-7">
+      <section className="relative overflow-hidden rounded-[28px] border border-emerald-500/20 bg-gradient-to-br from-emerald-500/12 via-card to-card p-6 lg:p-8 shadow-2xl shadow-black/20">
+        <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400"><WalletCards className="h-3.5 w-3.5" /> Finanzas</div>
+            <h1 className="text-3xl font-black tracking-tight text-foreground lg:text-4xl">Cuotas y cobranzas</h1>
+            <p className="mt-2 max-w-xl text-sm text-muted-foreground lg:text-base">Controlá ingresos, vencimientos y seguimientos sin perder de vista a ningún alumno.</p>
+          </div>
         <Dialog open={dialogOpen} onOpenChange={open => { setDialogOpen(open); if (!open) setForm({ student_id: '', amount: '', due_date: '', payment_method: 'cash', already_paid: true }); }}>
-          <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" />Registrar Pago</Button></DialogTrigger>
+          <DialogTrigger asChild><Button className="h-11 rounded-xl bg-emerald-500 px-5 font-bold text-slate-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-400"><Plus className="mr-2 h-4 w-4" />Registrar pago</Button></DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Nuevo Pago</DialogTitle></DialogHeader>
             <div className="space-y-3 mt-4">
@@ -157,12 +163,13 @@ const Payments: React.FC = () => {
             </Button>
           </DialogContent>
         </Dialog>
-      </div>
+        </div>
+      </section>
 
       {/* Summary cards */}
-      <div className={`grid grid-cols-1 ${isOwner ? 'sm:grid-cols-3' : 'sm:grid-cols-1'} gap-4 mb-6`}>
+      <div className={`grid grid-cols-1 ${isOwner ? 'md:grid-cols-3' : 'md:grid-cols-1'} gap-4`}>
         {isOwner && (
-          <Card>
+          <Card className="group overflow-hidden rounded-2xl border-border/70 bg-card/80 shadow-lg shadow-black/10 transition-all hover:-translate-y-0.5 hover:border-emerald-500/30">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Cobrado este mes</CardTitle>
               <DollarSign className="h-4 w-4 text-success" />
@@ -171,7 +178,7 @@ const Payments: React.FC = () => {
           </Card>
         )}
         {isOwner && (
-          <Card>
+          <Card className="group overflow-hidden rounded-2xl border-border/70 bg-card/80 shadow-lg shadow-black/10 transition-all hover:-translate-y-0.5 hover:border-emerald-500/30">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Pendiente</CardTitle>
               <AlertTriangle className="h-4 w-4 text-warning" />
@@ -179,7 +186,7 @@ const Payments: React.FC = () => {
             <CardContent><div className="text-2xl font-bold text-foreground">${totalPending.toLocaleString()}</div></CardContent>
           </Card>
         )}
-        <Card>
+        <Card className="group overflow-hidden rounded-2xl border-border/70 bg-card/80 shadow-lg shadow-black/10 transition-all hover:-translate-y-0.5 hover:border-red-500/30">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Morosos</CardTitle>
             <AlertTriangle className="h-4 w-4 text-destructive" />
@@ -189,7 +196,7 @@ const Payments: React.FC = () => {
       </div>
 
       {/* Quick filters */}
-      <div className="flex gap-2 mb-4 flex-wrap">
+      <div className="flex flex-wrap gap-2 rounded-2xl border border-border/70 bg-card/60 p-2 backdrop-blur">
         {[
           { value: 'all', label: 'Todos' },
           { value: 'pending', label: '🟡 Por vencer' },
@@ -207,10 +214,10 @@ const Payments: React.FC = () => {
         ))}
       </div>
 
-      <div className="border rounded-lg overflow-auto bg-card">
+      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card/70 shadow-2xl shadow-black/10">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/50">
+            <TableRow className="border-border/70 bg-muted/30">
               <TableHead>Alumno</TableHead>
               <TableHead>Monto</TableHead>
               <TableHead>Vencimiento</TableHead>
@@ -227,7 +234,7 @@ const Payments: React.FC = () => {
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No hay pagos registrados</TableCell></TableRow>
             ) : filtered.map(payment => (
-              <TableRow key={payment.id} className={getRowClass(payment)}>
+              <TableRow key={payment.id} className={`${getRowClass(payment)} border-border/60 transition-colors hover:bg-emerald-500/[0.04]`}>
                 <TableCell className="font-medium">{payment.student_name}</TableCell>
                 <TableCell>${Number(payment.amount).toLocaleString()}</TableCell>
                 <TableCell>{payment.due_date}</TableCell>
